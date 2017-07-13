@@ -6,7 +6,7 @@ from extractor.entrytype import *
 
 ROM_FILE_NAME = "..\ROMs\Wolfenstein 3D (USA).sfc"
 ##ROM_FILE_NAME = "..\ROMs\Super Noah's Ark 3D (U) [!].smc"
-ROM_FILE_NAME = "..\ROMs\Wolfenstein 3D (USA) (Beta).sfc"
+##ROM_FILE_NAME = "..\ROMs\Wolfenstein 3D (USA) (Beta).sfc"
 output_path = "output"
 
 '''

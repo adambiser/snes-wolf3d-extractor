@@ -46,3 +46,13 @@ Inserts a string at a given index within another strings.
 '''
 def insert_string(string, index, insert_string):
     return string[:index] + insert_string + string[index:]
+
+'''
+A funky method that stores the values of one dict in another dict and returns the length.
+Mainly useful for processing entry_lists and a lambda that loads and stores information and
+returns the count is needed for the entry count.
+'''
+def store_and_get_length(self, store, value):
+    del store[:]
+    store.extend(value)
+    return len(store)
