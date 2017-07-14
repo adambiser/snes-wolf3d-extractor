@@ -48,9 +48,6 @@ class Map(AbstractEntry):
                 b = read_ushort(rom)
                 count = (b & 0xf) + 3
                 offset = (b & 0xfff0) >> 4
-##                b = read_ubyte(rom)
-##                count = (b & 0xf) + 3
-##                offset = ((b & 0xf0) >> 4) | (read_ubyte(rom) << 4)
                 for x in range(0, count):
                     self._walls[index] = self._walls[index - offset]
                     index += 1
@@ -70,13 +67,15 @@ class Map(AbstractEntry):
                 break
             x = struct.unpack('<B', x)[0]
             y = read_ubyte(rom)
-            assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
-            assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
+##            assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
+##            assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
+            if not (0 <= x <= Map._MAP_SIZE and 0 <= y <= Map._MAP_SIZE):
+                print '{} had an object located off the map at {}, {}. Correcting.'.format(self.name, x, y)
             # Correct out of bounds objects... TODO why does this happen?
-##            if x < 0: x += Map._MAP_SIZE
-##            if x >= Map._MAP_SIZE: x -= Map._MAP_SIZE
-##            if y < 0: y += Map._MAP_SIZE
-##            if y >= Map._MAP_SIZE: y -= Map._MAP_SIZE
+            if x < 0: x += Map._MAP_SIZE
+            if x >= Map._MAP_SIZE: x -= Map._MAP_SIZE
+            if y < 0: y += Map._MAP_SIZE
+            if y >= Map._MAP_SIZE: y -= Map._MAP_SIZE
             object_code = read_ubyte(rom)
             self._objects.append({
                 'x': x,
