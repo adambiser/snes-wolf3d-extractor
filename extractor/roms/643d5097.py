@@ -4,5 +4,5 @@ import importlib
 base = importlib.import_module('.a2315a14', 'extractor.roms')
 
 def init(rom):
-    base._rom_name = "Super Noah's Ark 3D (2013)"
+    base._rom_name = "Super 3D Noah's Ark (2013)"
     base.init(rom)

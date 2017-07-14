@@ -9,7 +9,7 @@ Example from S3DNA:
     [-1, 'overhead_map_tiles_2', Image, Image.PLANAR_8BIT, 7, 1, "main"],
 '''
 
-_rom_name = "Super Noah's Ark 3D (1994)"
+_rom_name = "Super 3D Noah's Ark (1994)"
 
 def init(rom):
     rom.rom_name = _rom_name
