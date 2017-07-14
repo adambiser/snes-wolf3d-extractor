@@ -9,8 +9,10 @@ Example from S3DNA:
     [-1, 'overhead_map_tiles_2', Image, Image.PLANAR_8BIT, 7, 1, "main"],
 '''
 
+_rom_name = "Super Noah's Ark 3D (1994)"
+
 def init(rom):
-    rom.rom_name = "Super Noah's Ark 3D (1994)"
+    rom.rom_name = _rom_name
     # If offset is -1, it is assumed to immediately follow the previous entry.
     rom.add_entry(Palette(0x76168, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
