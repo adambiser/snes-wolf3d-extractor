@@ -1,6 +1,6 @@
 from . import AbstractEntry
 from ..utils import *
-from ..png import png
+from ..pypng import png
 
 class Image(AbstractEntry):
     """Represents an image that is loaded from the rom.
