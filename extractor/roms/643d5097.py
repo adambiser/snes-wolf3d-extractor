@@ -1,7 +1,7 @@
-from . import a2315a14 as noah
-
 # The 2013 Steam release of SNA3D is the same as 1994 version
 # but with a newer copyright.
+
+noah = importlib.import_module('.a2315a14', 'extractor.roms')
 
 def init(rom):
     noah.init(rom)
