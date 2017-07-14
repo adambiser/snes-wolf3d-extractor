@@ -1,5 +1,4 @@
-import importlib
-base = importlib.import_module('.6582a8f5', 'extractor.roms')
+from . import wolf3d as base
 
 def init(rom):
     base._rom_name = "Wolfenstein 3D (Beta 1)"
