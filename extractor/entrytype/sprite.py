@@ -59,9 +59,9 @@ class Sprite(Image):
                     offset_index += 1
                 jump_amount = read_ubyte(rom)
             sprite['offset'] = sprite_data_offset + struct.unpack('<I', offset)[0]
-            if jump_amount == 0x95: # Magic number for US!
-                break
-            if jump_amount == 0x91: # Magic number for beta 1!
+            # Test if this bit is set and if so, stop.
+            # Probably not the way it worked, but it works for all roms.
+            if jump_amount & 0x80:
                 break
         return sprites
 
