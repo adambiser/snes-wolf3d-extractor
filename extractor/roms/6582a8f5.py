@@ -2,12 +2,26 @@ from ..entrytype import *
 from ..utils import insert_string
 import struct
 
+# These can be modified by rom info files using this one as their base.
+_rom_name = "Wolfenstein 3D (USA)"
+_starting_offset = 0x82ab3
+_has_ball_texture = True
+_map_offset_list_offset = 0xfc886
+_map_name_offset = 0x3958
+_sprite_info_offset = 0xfda6e
+_sound_info_offset_1 = 0xe981e
+_sound_info_offset_2 = 0xfc6b8
+_sound_group_2_count = 5
+
 def init(rom):
-    rom.rom_name = "Wolfenstein 3D (USA)"
+    rom.rom_name = _rom_name
     # If offset is -1, it is assumed to immediately follow the previous entry.
-    rom.add_entry(Image(0x82ab3, 'ball_texture', Image.LINEAR_8BIT_RMO, 64, 64, "main"))
-    rom.add_entry(ByteData(-1, 'unknown', 1)) # There is 1 more byte, padding?
-    rom.add_entry(Palette(-1, 'title'))
+    if _has_ball_texture:
+        rom.add_entry(Image(_starting_offset, 'ball_texture', Image.LINEAR_8BIT_RMO, 64, 64, "main"))
+        rom.add_entry(ByteData(-1, 'unknown', 1)) # There is 1 more byte, padding?
+        rom.add_entry(Palette(-1, 'title'))
+    else:
+        rom.add_entry(Palette(_starting_offset, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
     rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
@@ -64,9 +78,9 @@ def init(rom):
     # Map offsets are stored as: 00 01 35 03 CC
     # final CC needs to be converted to be 0C
     # 00 01 appears to mark index entries.
-    map_offsets = read_rom_address_list(rom, 0xfc886, 30)
+    map_offsets = read_rom_address_list(rom, _map_offset_list_offset, 30)
     for x in range(len(map_offsets)):
-        entry_name = rom.read_text_chunk(0x3958 + x * 3, 2)
+        entry_name = rom.read_text_chunk(_map_name_offset + x * 3, 2)
         entry_name = 'Map ' + insert_string(entry_name, 1, '-')
         rom.add_entry(Map(map_offsets[x], entry_name))
     # Add walls
@@ -79,7 +93,7 @@ def init(rom):
                   )
             )
     # Add sprites
-    sprite_info = Sprite.read_sprite_info_wolf3d(rom, 0xfda6e, 0x30000)
+    sprite_info = Sprite.read_sprite_info_wolf3d(rom, _sprite_info_offset, 0x30000)
     for x in range(len(sprite_info)):
         entry_name = 'sprite_{:03d}'.format(x)
         rom.add_entry(
@@ -88,7 +102,7 @@ def init(rom):
                    sprite_info[x]['column_count'], "main"
                    )
             )
-    sound_info = Sound.read_sound_info(rom, 0xe981e, 0xfc6b8, 5)
+    sound_info = Sound.read_sound_info(rom, _sound_info_offset_1, _sound_info_offset_2, _sound_group_2_count)
     for x in range(len(sound_info)):
         entry_name = 'sound_{:02d}'.format(x)
         rom.add_entry(
