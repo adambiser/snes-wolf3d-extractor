@@ -59,7 +59,7 @@ def init(rom):
     # Map offsets are stored as: 4A C9 CA 00
     # CA needs to become 0A.
     for x in range(31):
-        map_offset = rom._read_address(0xfc820 + x * 4)
+        map_offset = rom.read_rom_address_from(0xfc820 + x * 4)
         if x < 30:
             entry_name = rom.read_text_chunk(0xfca65 + x * 3, 2)
             entry_name = 'Map ' + insert_string(entry_name, 1, '-')
