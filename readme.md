@@ -35,10 +35,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * [PyPNG](https://github.com/drj11/pypng) is used to save images.
 * Blzut3 for helping out.
-
-Currently extracts:
-
-This does not (yet?) extract:
-- Music
-- Text
-'''
