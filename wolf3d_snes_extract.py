@@ -4,9 +4,10 @@ import sys
 from extractor import *
 from extractor.entrytype import *
 
-ROM_FILE_NAME = "..\ROMs\Wolfenstein 3D (USA).sfc"
-##ROM_FILE_NAME = "..\ROMs\Super Noah's Ark 3D (U) [!].smc"
-##ROM_FILE_NAME = "..\ROMs\Wolfenstein 3D (USA) (Beta).sfc"
+ROM_FILE_NAME = "input\Wolfenstein 3D (USA).sfc"
+##ROM_FILE_NAME = "input\Super Noah's Ark 3D (U) [!].smc"
+##ROM_FILE_NAME = "input\Wolfenstein 3D (USA) (Beta 1).sfc"
+##ROM_FILE_NAME = "input\Super Noah's Ark 3D (U) (2013).sfc"
 output_path = "output"
 
 '''
@@ -32,7 +33,9 @@ with Rom(ROM_FILE_NAME) as rom:
         # Skip maps. They were done first.
         if rom.get_entry_type(g) is Map:
             continue
+##        if not rom.get_entry_type(g) is Sprite:
+##            continue
         entry = rom.get_entry(g)
         print '0x{:x} - {}'.format(entry.offset, entry.name)
-        entry.save(output_path + "/" + entry.name + entry.get_default_extension())
+        entry.save(output_path)
 ##        break

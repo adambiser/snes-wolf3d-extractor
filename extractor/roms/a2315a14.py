@@ -1,13 +1,18 @@
 from ..entrytype import *
 from ..utils import insert_string
-import struct
+
+'''
+TODO
+Allow for non-retangular tiled image extraction
+Example from S3DNA:
+    [-1, 'overhead_map_tiles_1', Image, Image.PLANAR_8BIT, 8, 5, "main"],
+    [-1, 'overhead_map_tiles_2', Image, Image.PLANAR_8BIT, 7, 1, "main"],
+'''
 
 def init(rom):
-    rom.rom_name = "Wolfenstein 3D (USA)"
+    rom.rom_name = "Super Noah's Ark 3D (1994)"
     # If offset is -1, it is assumed to immediately follow the previous entry.
-    rom.add_entry(Image(0x82ab3, 'ball_texture', Image.LINEAR_8BIT_RMO, 64, 64, "main"))
-    rom.add_entry(ByteData(-1, 'unknown', 1)) # There is 1 more byte, padding?
-    rom.add_entry(Palette(-1, 'title'))
+    rom.add_entry(Palette(0x76168, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
     rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
@@ -32,19 +37,13 @@ def init(rom):
     rom.add_entry(Image(-1, 'intermission_of', Image.PLANAR_4BIT, 4, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'intermission_overall', Image.PLANAR_4BIT, 15, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'intermission_colon', Image.PLANAR_4BIT, 1, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_0', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_1', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_2', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_3', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_4', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_5', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_6', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_7', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_8', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'intermission_number_9', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
+    for x in range(10):
+        rom.add_entry(Image(-1, 'intermission_number_{}'.format(x), Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'intermission_percent', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'intermission_exclamation', Image.PLANAR_4BIT, 1, 2, "intermission", 0x20, 0x20))
-    rom.add_entry(Image(-1, 'overhead_map_tiles', Image.PLANAR_8BIT, 8, 5, "main"))
+    # NOTE: This is different from the Wolf3D rom.
+    rom.add_entry(Image(-1, 'overhead_map_tiles_1', Image.PLANAR_8BIT, 8, 5, "main"))
+    rom.add_entry(Image(-1, 'overhead_map_tiles_2', Image.PLANAR_8BIT, 7, 1, "main"))
     rom.add_entry(Palette(-1, 'main'))
     rom.add_entry(ByteData(-1, 'unknown', 0x2300)) # Unknown data that's 0x2300 bytes long.
     rom.add_entry(Image(-1, 'status_bar_left_text', Image.PLANAR_4BIT, 14, 1, "main", 0xf0, 0xf0))
@@ -54,21 +53,19 @@ def init(rom):
     rom.add_entry(Image(-1, 'font', Image.PLANAR_4BIT, 16, 6, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_numbers', Image.PLANAR_4BIT, 16, 2, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_faces', Image.PLANAR_4BIT, 16, 8, "main", 0xf0, 0xf0))
-    rom.add_entry(Image(-1, 'weapon_0', Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
-    rom.add_entry(Image(-1, 'weapon_1', Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
-    rom.add_entry(Image(-1, 'weapon_2', Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
-    rom.add_entry(Image(-1, 'weapon_3', Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
-    rom.add_entry(Image(-1, 'weapon_4', Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
-    rom.add_entry(Image(-1, 'weapon_5', Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
+    for x in range(6):
+        rom.add_entry(Image(-1, 'weapon_{}'.format(x), Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
     # Add maps
-    # Map offsets are stored as: 00 01 35 03 CC
-    # final CC needs to be converted to be 0C
-    # 00 01 appears to mark index entries.
-    map_offsets = read_rom_address_list(rom, 0xfc886, 30)
-    for x in range(len(map_offsets)):
-        entry_name = rom.read_text_chunk(0x3958 + x * 3, 2)
-        entry_name = 'Map ' + insert_string(entry_name, 1, '-')
-        rom.add_entry(Map(map_offsets[x], entry_name))
+    # Map offsets are stored as: 4A C9 CA 00
+    # CA needs to become 0A.
+    for x in range(31):
+        map_offset = rom._read_address(0xfc820 + x * 4)
+        if x < 30:
+            entry_name = rom.read_text_chunk(0xfca65 + x * 3, 2)
+            entry_name = 'Map ' + insert_string(entry_name, 1, '-')
+        else:
+            entry_name = 'Game Over'
+        rom.add_entry(Map(map_offset, entry_name))
     # Add walls
     for x in range(64):
         entry_name = 'wall_{:02d}'.format(x)
@@ -79,7 +76,7 @@ def init(rom):
                   )
             )
     # Add sprites
-    sprite_info = Sprite.read_sprite_info_wolf3d(rom, 0xfda6e, 0x30000)
+    sprite_info = Sprite.read_sprite_info_noah(rom, 0xfdd6f, 0x30000)
     for x in range(len(sprite_info)):
         entry_name = 'sprite_{:03d}'.format(x)
         rom.add_entry(
@@ -88,7 +85,8 @@ def init(rom):
                    sprite_info[x]['column_count'], "main"
                    )
             )
-    sound_info = Sound.read_sound_info(rom, 0xe981e, 0xfc6b8, 5)
+    # Add sounds
+    sound_info = Sound.read_sound_info(rom, 0xdd791, 0xfc70a, 19)
     for x in range(len(sound_info)):
         entry_name = 'sound_{:02d}'.format(x)
         rom.add_entry(
@@ -97,15 +95,3 @@ def init(rom):
                    sound_info[x]['loop_offset']
                    )
             )
-
-def read_rom_address_list(rom, offset, count):
-    """Reads a list of addresses in Wolf3D's weird storage method."""
-    rom.seek(offset)
-    offsets = []
-    for x in range(count):
-        zb = rom.read_ubyte()
-        assert 1 <= zb <= 3
-        zb -= 1
-        address = '\00' * zb + rom.read(4 - zb)
-        offsets.append(struct.unpack('<I', address)[0] - 0xc00000)
-    return offsets

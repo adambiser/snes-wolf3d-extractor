@@ -1,8 +1,9 @@
-from entry import Entry
+from . import AbstractEntry
 from ..utils import *
 from ..wav import wav
 
-class Sound(Entry):
+class Sound(AbstractEntry):
+    brr = None
     loop_offset = None
     # Configuration constants
     SAMPLE_RATE = 11025
@@ -11,29 +12,38 @@ class Sound(Entry):
     Constructor.
     Loads brr sound data from the current position within the rom.
     '''
-    def __init__(self, rom, name, loop_offset=None):
-        Entry.__init__(self, rom, name)
+    def __init__(self, offset, name, loop_offset=None):
+        AbstractEntry.__init__(self, offset, name)
         self.loop_offset = loop_offset
-        print 'start: {:x}'.format(rom.tell())
-        self.brr = self.read_brr_data(rom)
-        print 'finish: {:x}'.format(rom.tell())
-        print '{} has {} blocks'.format(name, len(self.brr))
 
-    '''
-    Returns a dictionary of the sound offsets.
-    "data" is the offsets for all sounds.
-    "loop" is the offsets of the loop position within the sound data.
-    '''
+    def load(self, rom):
+        rom.seek(self.offset)
+        self.brr = Sound.read_brr_data(rom)
+
+    def save(self, path, filename=None, filetype=None):
+        """Saves the sound as a WAV file."""
+        data = self.get_wav_info()
+        filename = self._get_filename(path, filename, self.name + '.wav')
+        with open(filename, 'wb') as f:
+            w = wav.Writer(Sound.SAMPLE_RATE, 1, 16)
+            w.write(f, data['data'], data.get('loop_offset'))
+
     @staticmethod
     def read_sound_info(rom, sound_info_offset_1, sound_info_offset_2, sounds_2_count):
+        """Returns an array of sound offset dicts.
+
+        For each sound offset dict:
+        'offset' - The offset of the sound within the rom.
+        'loop_offset' - The loop start offset within the brr data.
+        """
         # Load information for the first group of sounds.
         rom.seek(sound_info_offset_1)
         last_sound_1_offset = read_ushort(rom)
         # Not sure what this value really means, but it works.
         offset_delta = read_ushort(rom)
         # Skip to offset list.
-        print 'reading sound group 1 at {:x}'.format(rom.tell())
-        print 'last_sound_1_offset: {:x}'.format(last_sound_1_offset)
+##        print 'reading sound group 1 at {:x}'.format(rom.tell())
+##        print 'last_sound_1_offset: {:x}'.format(last_sound_1_offset)
         rom.seek(0x400, 1)
         sounds = []
         while True:
@@ -47,8 +57,8 @@ class Sound(Entry):
             sound['offset'] = sound_info_offset_1 + 4 + data_offset
             # Convert loop offset to offset within sound data.
             sound['loop_offset'] = read_ushort(rom) - offset_delta - data_offset
-        print 'found {} sounds'.format(len(sounds))
-        print sounds
+##        print 'found {} sounds'.format(len(sounds))
+##        print sounds
         # Load information for the second group of sounds.
         # There are 4 unknown bytes between these groups.
         first_sound_2_offset = sound_info_offset_1 + 4 + last_sound_1_offset + 4
@@ -65,15 +75,12 @@ class Sound(Entry):
             sound = sounds[-1]
             sound['offset'] = first_sound_2_offset + read_ushort(rom)
             sound['loop_offset'] = 0 # Never loops.
-        print 'total: {} sounds'.format(len(sounds))
+##        print 'total: {} sounds'.format(len(sounds))
         return sounds
 
-    '''
-    Reads raw BRR data for the sound at the current position in the rom.
-    '''
     @staticmethod
     def read_brr_data(rom):
-        end_flag = 0
+        """Reads raw BRR data for the sound at the current position in the rom."""
         brr = []
         while True:
             brr.append(struct.unpack('9B', rom.read(9)))
@@ -82,24 +89,24 @@ class Sound(Entry):
                 break
         return brr
 
-    '''
-    Converts an unsigned nibble to a signed nibble.
-    '''
     @staticmethod
     def signed_nibble(x):
+        """Converts an unsigned nibble to a signed nibble."""
         return (x | ~7) if (x & 8) else (x & 7)
 
-    '''
-    Clamps a signed short to be within its upper and lower bounds.
-    '''
     @staticmethod
     def clamp_short(x):
+        """Clamps a signed short to be within its upper and lower bounds."""
         return -32768 if x < -32768 else 32767 if x > 32767 else x
 
-    '''
-    Converts the brr sound data to raw 16-bit WAV data.
-    '''
     def get_wav_info(self):
+        """Converts the brr sound data to raw 16-bit WAV data.
+
+        Returns a dict with the following entries:
+        'data' - The converted WAV data.
+        'looping' - When True, the sound loops.
+        'loop_offset' - Offset to the loop start within the WAV data.
+        """
         nibble = [0, 0]
         end_flag = 0
         data = []
@@ -130,19 +137,3 @@ class Sound(Entry):
             'looping': looping,
             'loop_offset': (self.loop_offset / 9) * 16 if looping else None
             }
-
-    '''
-    Saves the given sound information to a WAV file.
-    '''
-    def save(self, filename):
-        data = self.get_wav_info()
-        with open(filename, 'wb') as f:
-            w = wav.Writer(Sound.SAMPLE_RATE, 1, 16)
-            w.write(f, data['data'], data.get('loop_offset'))
-
-    '''
-    Returns the default file extension to use while saving.
-    Should begin with the period.
-    '''
-    def get_default_extension(self):
-        return ".wav"

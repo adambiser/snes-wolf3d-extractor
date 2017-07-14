@@ -1,12 +1,16 @@
-from entry import Entry
+from . import AbstractEntry
 from ..utils import *
 
-class Map(Entry):
+class Map(AbstractEntry):
+    """Reads a Wolfenstein 3D map stored in the SNES format.
+
+    Can convert to the DOS format and save to the WDC file format.
+    """
     # Config settings
-    _DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS = False
+    DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS = False
     # Variables
     _walls = None
-    _extra = None # The unknown 64 bytes after the end of the wall data.
+    _extra_bytes = None # The unknown 64 bytes after the end of the wall data.
     _objects = None
     # Constants
     _MAP_SIZE = 64
@@ -22,27 +26,31 @@ class Map(Entry):
     _WEST = 0x4
     _EAST = 0x8
 
-    '''
-    Constructor.
-    Loads and decompresses the SNES map data from a given file at the current position within the file.
-    '''
-    def __init__(self, rom, name):
-        Entry.__init__(self, rom, name)
-        # Assuming this is an uncompressed size, but since this doesn't do anything with the data after the object list, ignore.
+    def __init__(self, offset, name):
+        AbstractEntry.__init__(self, offset, name)
+
+    def load(self, rom):
+        rom.seek(self.offset)
+        # Assuming this is an uncompressed size, but since this code doesn't do
+        # anything with the data after the object list, ignore.
         uncompressed_size = read_ushort(rom)
         # This format has 64 extra bytes after the wall data that are compressed the same way.
         self._walls = [0 for x in range(Map._MAP_SIZE * Map._MAP_SIZE + 64)]
-        # Decompress the wall data.
+        # Read and decompress the wall data.
         tag = read_ubyte(rom)
+        # Number of bits for the value of 'count' down below.
         match_bits = read_ubyte(rom)
         assert match_bits == 4
         index = 0
         while index < len(self._walls):
             b = read_ubyte(rom)
             if b == tag:
-                b = read_ubyte(rom)
+                b = read_ushort(rom)
                 count = (b & 0xf) + 3
-                offset = ((b & 0xf0) >> 4) | (read_ubyte(rom) << 4)
+                offset = (b & 0xfff0) >> 4
+##                b = read_ubyte(rom)
+##                count = (b & 0xf) + 3
+##                offset = ((b & 0xf0) >> 4) | (read_ubyte(rom) << 4)
                 for x in range(0, count):
                     self._walls[index] = self._walls[index - offset]
                     index += 1
@@ -50,12 +58,10 @@ class Map(Entry):
                 self._walls[index] = b
                 index += 1
         # Split the extra 64 bytes into a new list and remove them from the wall bytes.
-        self._extra = self._walls[-64:]
+        self._extra_bytes = self._walls[-64:]
         self._walls = self._walls[:-64]
         # Read the object list.
-##        print 'map offset: {:x}, object start: {:x}'.format(self.offset, rom.tell())
         object_count = read_ushort(rom)
-##        print 'object_count: {:x}'.format(object_count)
         rom.seek(0x6, 1)
         self._objects = []
         for o in range(object_count):
@@ -64,14 +70,13 @@ class Map(Entry):
                 break
             x = struct.unpack('<B', x)[0]
             y = read_ubyte(rom)
-##            assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
-##            assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
+            assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
+            assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
             # Correct out of bounds objects... TODO why does this happen?
-            if x < 0: x += Map._MAP_SIZE
-            if x >= Map._MAP_SIZE: x -= Map._MAP_SIZE
-            if y < 0: y += Map._MAP_SIZE
-            if y >= Map._MAP_SIZE: y -= Map._MAP_SIZE
-                
+##            if x < 0: x += Map._MAP_SIZE
+##            if x >= Map._MAP_SIZE: x -= Map._MAP_SIZE
+##            if y < 0: y += Map._MAP_SIZE
+##            if y >= Map._MAP_SIZE: y -= Map._MAP_SIZE
             object_code = read_ubyte(rom)
             self._objects.append({
                 'x': x,
@@ -82,13 +87,14 @@ class Map(Entry):
             if object_code == Map._PUSHWALL:
                 self._objects[-1]['wall'] = read_ubyte(rom)
 
-    '''
-    Converts the SNES map data to DOS map format.
-    Returns the map as plane data.
-    Note that this is not perfect because of how pushwalls work in the SNES.
-    When _DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS is True, it does its best to convert SNES pushwalls to DOS pushwalls.
-    '''
     def generate_dos_map(self):
+        """Converts the SNES map data to DOS map format.
+
+        This is not perfect because of how pushwalls work in the SNES.
+        See _fix_pushwall() for further information.
+
+        Returns a dict with the map's name in 'name' and plane data in 'tiles'.
+        """
         # Convert wall code
         tiles = [[0 for x in range(len(self._walls))] for p in range(Map._PLANE_COUNT)]
         for index in range(0, len(self._walls)):
@@ -109,35 +115,42 @@ class Map(Entry):
                 # Pushwalls have an extra byte indicating the wall tile. The wall plane has a floor code.
                 # Place the wall tile in the wall plane for DOS maps.
                 if obj['code'] == Map._PUSHWALL:
-                    self._fix_pushwall(tiles, obj)
+                    Map._fix_pushwall(tiles, obj)
         return {
             'name': self.name,
             'tiles': tiles,
             }
 
-    '''
-    Converts the SNES pushwalls into tiles that DOS pushwalls need to work.
-    The SNES pushwall went into a wall in its final step. DOS pushwalls need all times to be floor codes.
-    When _DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS is True, this attempts to determine the pushwall
-    direction and converts the end tile to a floor code so that would work in the DOS game.
-    '''
-    def _fix_pushwall(self, tiles, obj):
+    @staticmethod
+    def _fix_pushwall(tiles, obj):
+        """Converts the SNES pushwalls into tiles that DOS pushwalls need to work.
+
+        SNES pushwalls are objects with a wall code that moves two spaces and go
+        into a wall in its final resting spot.
+
+        DOS pushwalls are moving walls and move two spots or until they hit a
+        wall.
+
+        This code places a pushwall's wall code into the wall plane and
+        when DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS is True,
+        this attempts to find the direction the pushwall is supposed to move
+        and sets that wall tile to the appropriate floor code.
+        """
         index = obj['x'] + obj['y'] * Map._MAP_SIZE
         tiles[0][index] = obj['wall']
-        if not self._DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS:
+        if not Map.DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS:
             return
-        # On the SNES, pushwalls act like objects that move into a wall at its final position.
-        # Check each direction to see if it's a possible move.
+        # Check each direction to find all valid moves.
         move_dir = 0
-        if self._is_pushwall_direction(tiles, obj, 'y', -1):
+        if Map._is_valid_pushwall_direction(tiles, obj, 'y', -1):
             move_dir |= Map._NORTH
-        if self._is_pushwall_direction(tiles, obj, 'y', 1):
+        if Map._is_valid_pushwall_direction(tiles, obj, 'y', 1):
             move_dir |= Map._SOUTH
-        if self._is_pushwall_direction(tiles, obj, 'x', -1):
+        if Map._is_valid_pushwall_direction(tiles, obj, 'x', -1):
             move_dir |= Map._WEST
-        if self._is_pushwall_direction(tiles, obj, 'x', 1):
+        if Map._is_valid_pushwall_direction(tiles, obj, 'x', 1):
             move_dir |= Map._EAST
-        # If there's only one possible move direction, set the end tile to be the floor code.
+        # If there's only one valid move direction, set the end tile to be the floor code.
         if move_dir == Map._NORTH:
             tiles[0][index - Map._MAP_SIZE * 2] = tiles[0][index - Map._MAP_SIZE]
         elif move_dir == Map._SOUTH:
@@ -162,10 +175,9 @@ class Map(Entry):
                     dirs.append("east")
             print 'Could not determine direction for pushwall at {},{}, choices: {}'.format(obj['x'], obj['y'], ', '.join(dirs))
 
-    '''
-    Checks to see whether a direction is a valid move for a pushwall.
-    '''
-    def _is_pushwall_direction(self, tiles, obj, move_coord_name, move_step):
+    @staticmethod
+    def _is_valid_pushwall_direction(tiles, obj, move_coord_name, move_step):
+        """Returns true if direction is a valid move for a pushwall."""
         other_coord_name = 'x' if move_coord_name == 'y' else 'y'
         steps = [{
             move_coord_name: obj[move_coord_name] + (x + 1) * move_step,
@@ -180,19 +192,17 @@ class Map(Entry):
         # See if the last step is a wall that matches the pushwall wall code.
         return tiles[0][steps[1]['x'] + steps[1]['y'] * Map._MAP_SIZE] == obj['wall']
 
-    '''
-    Tests to see if a code is a valid DOS map floor code.
-    '''
     @staticmethod
     def _is_dos_floor_code(code):
+        """Returns True when code is a valid DOS map floor code."""
         return Map._FLOOR_CODE_START <= code <= Map._FLOOR_CODE_STOP
 
-    '''
-    Saves the given maps to a WDC map file.
-    This assumes that the given maps are in the DOS map format.
-    '''
     @staticmethod
     def save_as_wdc_map_file(filename, maps):
+        """Saves all given maps to a single WDC map file
+
+        This assumes that the given maps are in the DOS map format.
+        """
         print "Saving %d maps to %s" % (len(maps), filename)
         with open(filename, 'wb') as f:
             f.write('WDC3.1')
@@ -206,16 +216,7 @@ class Map(Entry):
                 for p in range(Map._PLANE_COUNT):
                     f.write(struct.pack('<{}H'.format(len(m['tiles'][p])), *m['tiles'][p]))
 
-    '''
-    Saves this map to a WDC map file.
-    This assumes that the given maps are in the SNES map format.
-    '''
-    def save(self, filename):
+    def save(self, path, filename=None, filetype=None):
+        """Saves the map to a WDC map file."""
+        filename = self._get_filename(path, filename, self.name + '.map')
         Map.save_as_wdc_map_file(filename, [self.generate_dos_map()])
-
-    '''
-    Returns the default file extension to use while saving.
-    Should be with the period.
-    '''
-    def get_default_extension(self):
-        return ".map"
