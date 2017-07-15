@@ -113,17 +113,17 @@ def init(rom):
             )
 
 def read_rom_address_list(rom, offset, count):
-    """Reads a list of addresses in Wolf3D's weird storage method."""
+    """Reads a list of addresses in Wolf3D's weird storage method.
+    01 35 03 CC 00 -> 0xc0335
+    """
     rom.seek(offset)
     offsets = []
-##    print '{:x}'.format(offset)
     for x in range(count):
         zb = rom.read_ubyte()
         assert 1 <= zb <= 3, 'zb is {}'.format(zb)
         zb -= 1
         address = '\00' * zb + rom.read(4 - zb)
         offsets.append(struct.unpack('<I', address)[0] - 0xc00000)
-##        print offsets[-1]
     return offsets
 
 def read_sprite_info(rom, column_count_offset, sprite_data_offset):
