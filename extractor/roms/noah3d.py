@@ -1,5 +1,6 @@
 from ..entrytype import *
 from ..utils import insert_string
+import struct
 
 '''
 TODO
@@ -78,7 +79,7 @@ def init(rom):
                   )
             )
     # Add sprites
-    sprite_info = Sprite.read_sprite_info_noah(rom, 0xfdd6f, 0x30000)
+    sprite_info = read_sprite_info_(rom, 0xfdd6f, 0x30000)
     for x in range(len(sprite_info)):
         entry_name = 'sprite_{:03d}'.format(x)
         rom.add_entry(
@@ -97,3 +98,21 @@ def init(rom):
                    sound_info[x]['loop_offset']
                    )
             )
+
+def read_sprite_info_(rom, column_count_offset, sprite_data_offset):
+    """Reads sprite offsets and column counts from the rom.
+
+    SNA3D-style, simpler.
+    """
+    rom.seek(column_count_offset)
+    sprites = []
+    while True:
+        line_count = rom.read_ubyte()
+        if line_count == 0:
+            break;
+        sprites.append({})
+        sprite = sprites[-1]
+        sprite['column_count'] = line_count
+        rom.read(1) # always 0
+        sprite['offset'] = sprite_data_offset + struct.unpack('<I', rom.read(4))[0]
+    return sprites

@@ -93,7 +93,7 @@ def init(rom):
                   )
             )
     # Add sprites
-    sprite_info = Sprite.read_sprite_info_wolf3d(rom, _sprite_info_offset, 0x30000)
+    sprite_info = read_sprite_info(rom, _sprite_info_offset, 0x30000)
     for x in range(len(sprite_info)):
         entry_name = 'sprite_{:03d}'.format(x)
         rom.add_entry(
@@ -116,10 +116,42 @@ def read_rom_address_list(rom, offset, count):
     """Reads a list of addresses in Wolf3D's weird storage method."""
     rom.seek(offset)
     offsets = []
+##    print '{:x}'.format(offset)
     for x in range(count):
         zb = rom.read_ubyte()
-        assert 1 <= zb <= 3
+        assert 1 <= zb <= 3, 'zb is {}'.format(zb)
         zb -= 1
         address = '\00' * zb + rom.read(4 - zb)
         offsets.append(struct.unpack('<I', address)[0] - 0xc00000)
+##        print offsets[-1]
     return offsets
+
+def read_sprite_info(rom, column_count_offset, sprite_data_offset):
+    """Reads sprite offsets and column counts from the rom.
+
+    Wolf3D-style, complex...
+    """
+    rom.seek(column_count_offset)
+    sprites = []
+    while True:
+        sprites.append({})
+        sprite = sprites[-1]
+        sprite['column_count'] = rom.read_ushort()
+        offset = bytearray([0, 0, 0, 0])
+        offset_index = rom.read_ubyte() - 1
+        jump_amount = 0
+        if offset_index < len(offset):
+            while True:
+                byte = rom.read_ubyte()
+                if byte == 0:
+                    break
+                offset[offset_index] = byte
+                offset_index += 1
+            jump_amount = rom.read_ubyte()
+        sprite['offset'] = sprite_data_offset + struct.unpack('<I', offset)[0]
+        # Test if this bit is set and if so, stop.
+        # Probably not the way it worked, but it works for all roms.
+        if jump_amount & 0x80:
+            break
+    return sprites
+
