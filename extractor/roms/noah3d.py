@@ -11,6 +11,7 @@ Example from S3DNA:
 '''
 
 _rom_name = None
+_instrument_info_offset = 0x130
 
 def init(rom):
     rom.rom_name = _rom_name

@@ -12,10 +12,12 @@ _sprite_info_offset = None
 _sound_info_offset_1 = None
 _sound_info_offset_2 = None
 _sound_group_2_count = None
+_instrument_info_offset = None
 
 def init(rom):
     rom.rom_name = _rom_name
     # If offset is -1, it is assumed to immediately follow the previous entry.
+    rom.add_entry(InstrumentList(_instrument_info_offset, 'instruments'))
     if _has_ball_texture:
         rom.add_entry(Image(_starting_offset, 'ball_texture', Image.LINEAR_8BIT_RMO, 64, 64, "main"))
         rom.add_entry(ByteData(-1, 'unknown', 1)) # There is 1 more byte, padding?

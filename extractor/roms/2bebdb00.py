@@ -10,5 +10,6 @@ def init(rom):
     base._sound_info_offset_1 = 0xe9436
     base._sound_info_offset_2 = 0xfbeb8
     base._sound_group_2_count = 5
+    base._instrument_info_offset = 0x8b
     base.init(rom)
 
