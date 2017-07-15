@@ -19,111 +19,38 @@ class InstrumentList(AbstractEntry):
             return
         rom.seek(self.offset)
         # Load the instrument numbers and info offsets.
-        instr_info = []
+        self.instruments = {}
         has_another = True
         while has_another:
-            instr_info.append({})
-            info = instr_info[-1]
-            info['instrument_number'] = rom.read_ubyte()
+            instrument_number = rom.read_ubyte()
             b1 = rom.read_ubyte()
             assert b1 == 0
             b1 = rom.read_ubyte()
-            if b1 == 0xf0:
-                info['info_offset'] = rom.read_ubyte() + 1
-                info['info_offset'] += rom.tell()
-            elif b1 == 0xd0:
-                b1 = rom.read_ubyte()
-                assert b1 == 0x03
-                b1 = rom.read_ubyte()
-                assert b1 == 0x4c
-                info['info_offset'] = rom.read_ushort() + 1
+            if b1 == 0xf0: # Relative offset
+                info_offset = rom.read_ubyte() + 1
+                info_offset += rom.tell()
+            elif b1 == 0xd0: # Absolute offset
+                # No clue what this is.
+                unknown = rom.read(2)
+                assert unknown == '\x03\x4c'
+                info_offset = rom.read_ushort() + 1
             else:
                 raise Exception('Unexpected value: ' + hex(b1))
+            self.instruments[instrument_number] = Instrument(instrument_number, info_offset)
             has_another = (rom.read_ubyte() == 0xc9)
-        # Read instrument sound info.
-        sound_number = 0
-        for info in instr_info:
-            rom.seek(info['info_offset'])
-            b1 = rom.read_ubyte()
-            b2 = rom.read_ubyte()
-            if b2 == 0: # b1 is a new sound number
-                sound_number = b1
-                b1 = rom.read_ubyte()
-                assert b1 == 0x85
-                b1 = rom.read_ubyte()
-                assert b1 == 0x01
-                b2 = rom.read_ubyte()
-            if b2 == 0xa9: # Percussion
-                # Next value is the pitch value to use no matter what midi note is given.
-                info['is_percussion'] = True
-                info['pitch'] = rom.read_ushort()
-            elif b2 == 0xa5: # Melodic
-                info['is_percussion'] = False
-                b1 = rom.read_ubyte()
-                assert b1 == 0x0c
-                b1 = rom.read_ubyte()
-                assert b1 == 0x0a
-                b1 = rom.read_ubyte()
-                assert b1 == 0xaa
-                b1 = rom.read_ubyte()
-                assert b1 == 0xbf
-                info['pitch'] = self.read_3_byte_address(rom)
-            else:
-                raise Exception('Unexpected value: ' + hex(b2))
-            b1 = rom.read_ubyte()
-            assert b1 == 0x85
-            b1 = rom.read_ubyte()
-            assert b1 == 0x03
-            b1 = rom.read_ubyte()
-            assert b1 == 0xa6
-            b1 = rom.read_ubyte()
-            assert b1 == 0x0e
-            b1 = rom.read_ubyte()
-            assert b1 == 0xbf
-            info['velocity'] = rom.read_rom_address()
-            info['sound_number'] = sound_number
-        # Now create the instrument objects from all the info we have.
-        self.instruments = {}
-        sound_indices = rom.get_entries_of_class(Sound)
-        for info in instr_info:
-            instrument = Instrument()
-            instrument.instrument_number = info['instrument_number']
-            sound_info = rom.get_entry(sound_indices[info['sound_number']]).get_wav_info()
-            instrument.sound_data = sound_info['data']
-            instrument.sound_loop_offset = sound_info['loop_offset']
-            instrument.is_percussion = info['is_percussion']
-            if instrument.is_percussion:
-                instrument.pitch = info['pitch']
-            else:
-                instrument.pitch = self.read_ushort_table_at(rom, info['pitch'], 0x80)
-            instrument.velocity = self.read_ubyte_table_at(rom, info['velocity'], 0x80)
-            self.instruments[info['instrument_number']] = instrument
-##            print instrument.instrument_number, len(instrument.sound_data)
+        # Load the instrument sound info.
+##        sound_indices = rom.get_entries_of_class(Sound)
+        for info in self.instruments:
+            self.instruments[info].load(rom)
 
     def save(self, path, filename=None, filetype=None):
         """There is no save functionality defined for this entry type. Yet."""
 ##        filename = self._get_filename(path, filename, self.name + '.txt')
         pass
 
-    def read_3_byte_address(self, rom):
-        return struct.unpack('<I', rom.read(3) + '\00')[0] & 0x3fffff
-
-    def read_ubyte_table_at(self, rom, offset, length):
-        previous_offset = rom.tell()
-        rom.seek(offset)
-        table = struct.unpack('<' + length * 'B', rom.read(length))
-        rom.seek(previous_offset)
-        return table
-
-    def read_ushort_table_at(self, rom, offset, length):
-        previous_offset = rom.tell()
-        rom.seek(offset)
-        table = struct.unpack('<' + length * 'H', rom.read(length * 2))
-        rom.seek(previous_offset)
-        return table
-
 class Instrument:
     """An instrument based on a sound from the rom."""
+    _info_offset = None
     instrument_number = None
     sound_data = None
     sound_loop_offset = None
@@ -131,9 +58,62 @@ class Instrument:
     pitch = None
     velocity = None
 
-    def __init__(self):
-        pass
+    def __init__(self, instrument_number, info_offset):
+        self.instrument_number = instrument_number
+        self._info_offset = info_offset
 
-    def load(self, info_offset):
-        
-        
+    def load(self, rom):
+        sound_number = 0
+        rom.seek(self._info_offset)
+        b1 = rom.read_ubyte()
+        b2 = rom.read_ubyte()
+        if b2 == 0: # In this cause, b1 is the sound number.
+            sound_number = b1
+            # No clue what this is.
+            unknown = rom.read(2)
+            assert unknown == '\x85\x01'
+            b2 = rom.read_ubyte()
+        if b2 == 0xa9: # Percussion
+            # Next value is the pitch value to use no matter what midi note is given.
+            self.is_percussion = True
+            self.pitch = rom.read_ushort()
+        elif b2 == 0xa5: # Melodic
+            self.is_percussion = False
+            # No clue what this is.
+            unknown = rom.read(4)
+            assert unknown == '\x0c\x0a\xaa\xbf'
+            self.pitch = self.read_ushort_list_at(rom, self.read_3_byte_address(rom), 0x80)
+        else:
+            raise Exception('Unexpected value: ' + hex(b2))
+        # No clue what this is.
+        unknown = rom.read(5)
+        assert unknown == '\x85\x03\xa6\x0e\xbf'
+        self.velocity = self.read_ubyte_list_at(rom, self.read_3_byte_address(rom), 0x80)
+        # Load the sound data from the rom.
+        sound_info = rom.get_entry(rom.get_entries_of_class(Sound)[sound_number]).get_wav_info()
+        self.sound_data = sound_info['data']
+        self.sound_loop_offset = sound_info['loop_offset']
+
+    def read_3_byte_address(self, rom):
+        """Reads a 3 byte rom address (22-bit)."""
+        return struct.unpack('<I', rom.read(3) + '\00')[0] & 0x3fffff
+
+    def read_ubyte_list_at(self, rom, offset, length):
+        """Reads a list of unsigned bytes from the rom and sets the position
+        back to where it was before reading then.
+        """
+        previous_offset = rom.tell()
+        rom.seek(offset)
+        values = struct.unpack('<' + length * 'B', rom.read(length))
+        rom.seek(previous_offset)
+        return values
+
+    def read_ushort_list_at(self, rom, offset, length):
+        """Reads a list of unsigned shorts from the rom and sets the position
+        back to where it was before reading then.
+        """
+        previous_offset = rom.tell()
+        rom.seek(offset)
+        values = struct.unpack('<' + length * 'H', rom.read(length * 2))
+        rom.seek(previous_offset)
+        return values
