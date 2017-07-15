@@ -1,5 +1,4 @@
 from . import Image
-from ..utils import *
 
 class Sprite(Image):
     _column_count = None
@@ -16,21 +15,21 @@ class Sprite(Image):
         """Loads and converts sprite data into pixel data."""
         pixels = [[self._transparency_color_index for x in range(self._width)] for y in range(self._height)]
         page_offset = (self.offset & 0xffff0000)
-        pixel_x = (Sprite.SPRITE_SIZE - self._column_count) / 2
+        pixel_x = (self._width - self._column_count) / 2
         for line in range(self._column_count):
             rom.seek(self.offset + line * 2)
-            line_offset = page_offset + read_ushort(rom)
+            line_offset = page_offset + rom.read_ushort()
             while True:
                 rom.seek(line_offset)
                 line_offset += 6
-                topY = read_ushort(rom)
+                topY = rom.read_ushort()
                 if topY == 0xffff:
                     break
                 topY >>= 1
-                bottomY = read_ushort(rom) / 2
-                pixel_offset = read_ushort(rom)
+                bottomY = rom.read_ushort() / 2
+                pixel_offset = rom.read_ushort()
                 rom.seek(page_offset + pixel_offset + topY)
                 for y in range(topY, bottomY):
-                    pixels[y - 1][pixel_x] = read_ubyte(rom)
+                    pixels[y - 1][pixel_x] = rom.read_ubyte()
             pixel_x += 1
         self._pixels = pixels

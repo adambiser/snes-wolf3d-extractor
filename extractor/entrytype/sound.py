@@ -1,6 +1,6 @@
 from . import AbstractEntry
-from ..utils import *
 from ..wav import wav
+import struct
 
 class Sound(AbstractEntry):
     brr = None
@@ -38,9 +38,9 @@ class Sound(AbstractEntry):
         """
         # Load information for the first group of sounds.
         rom.seek(sound_info_offset_1)
-        last_sound_1_offset = read_ushort(rom)
+        last_sound_1_offset = rom.read_ushort()
         # Not sure what this value really means, but it works.
-        offset_delta = read_ushort(rom)
+        offset_delta = rom.read_ushort()
         # Skip to offset list.
 ##        print 'reading sound group 1 at {:x}'.format(rom.tell())
 ##        print 'last_sound_1_offset: {:x}'.format(last_sound_1_offset)
@@ -48,7 +48,7 @@ class Sound(AbstractEntry):
         sounds = []
         while True:
             # Adjust offsets by given delta.
-            data_offset = read_ushort(rom) - offset_delta
+            data_offset = rom.read_ushort() - offset_delta
             if data_offset == last_sound_1_offset:
                 break
             sounds.append({})
@@ -56,7 +56,7 @@ class Sound(AbstractEntry):
             # Convert data offset to a file offset.
             sound['offset'] = sound_info_offset_1 + 4 + data_offset
             # Convert loop offset to offset within sound data.
-            sound['loop_offset'] = read_ushort(rom) - offset_delta - data_offset
+            sound['loop_offset'] = rom.read_ushort() - offset_delta - data_offset
 ##        print 'found {} sounds'.format(len(sounds))
 ##        print sounds
         # Load information for the second group of sounds.
@@ -73,7 +73,7 @@ class Sound(AbstractEntry):
         for x in range(sounds_2_count):
             sounds.append({})
             sound = sounds[-1]
-            sound['offset'] = first_sound_2_offset + read_ushort(rom)
+            sound['offset'] = first_sound_2_offset + rom.read_ushort()
             sound['loop_offset'] = 0 # Never loops.
 ##        print 'total: {} sounds'.format(len(sounds))
         return sounds

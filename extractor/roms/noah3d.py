@@ -107,12 +107,11 @@ def read_sprite_info_(rom, column_count_offset, sprite_data_offset):
     rom.seek(column_count_offset)
     sprites = []
     while True:
-        line_count = rom.read_ubyte()
+        line_count = rom.read_ushort()
         if line_count == 0:
             break;
         sprites.append({})
         sprite = sprites[-1]
         sprite['column_count'] = line_count
-        rom.read(1) # always 0
         sprite['offset'] = sprite_data_offset + struct.unpack('<I', rom.read(4))[0]
     return sprites

@@ -1,5 +1,6 @@
 from . import AbstractEntry
-from ..utils import *
+from .. import utils
+import struct
 
 class Map(AbstractEntry):
     """Reads a Wolfenstein 3D map stored in the SNES format.
@@ -33,19 +34,19 @@ class Map(AbstractEntry):
         rom.seek(self.offset)
         # Assuming this is an uncompressed size, but since this code doesn't do
         # anything with the data after the object list, ignore.
-        uncompressed_size = read_ushort(rom)
+        uncompressed_size = rom.read_ushort()
         # This format has 64 extra bytes after the wall data that are compressed the same way.
         self._walls = [0 for x in range(Map._MAP_SIZE * Map._MAP_SIZE + 64)]
         # Read and decompress the wall data.
-        tag = read_ubyte(rom)
+        tag = rom.read_ubyte()
         # Number of bits for the value of 'count' down below.
-        match_bits = read_ubyte(rom)
+        match_bits = rom.read_ubyte()
         assert match_bits == 4
         index = 0
         while index < len(self._walls):
-            b = read_ubyte(rom)
+            b = rom.read_ubyte()
             if b == tag:
-                b = read_ushort(rom)
+                b = rom.read_ushort()
                 count = (b & 0xf) + 3
                 offset = (b & 0xfff0) >> 4
                 for x in range(0, count):
@@ -58,7 +59,7 @@ class Map(AbstractEntry):
         self._extra_bytes = self._walls[-64:]
         self._walls = self._walls[:-64]
         # Read the object list.
-        object_count = read_ushort(rom)
+        object_count = rom.read_ushort()
         rom.seek(0x6, 1)
         self._objects = []
         for o in range(object_count):
@@ -66,7 +67,7 @@ class Map(AbstractEntry):
             if x == '':
                 break
             x = struct.unpack('<B', x)[0]
-            y = read_ubyte(rom)
+            y = rom.read_ubyte()
 ##            assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
 ##            assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
             if not (0 <= x <= Map._MAP_SIZE and 0 <= y <= Map._MAP_SIZE):
@@ -76,7 +77,7 @@ class Map(AbstractEntry):
             if x >= Map._MAP_SIZE: x -= Map._MAP_SIZE
             if y < 0: y += Map._MAP_SIZE
             if y >= Map._MAP_SIZE: y -= Map._MAP_SIZE
-            object_code = read_ubyte(rom)
+            object_code = rom.read_ubyte()
             self._objects.append({
                 'x': x,
                 'y': y,
@@ -84,7 +85,7 @@ class Map(AbstractEntry):
                 })
             # Pushwalls have an extra byte indicating its wall tile.
             if object_code == Map._PUSHWALL:
-                self._objects[-1]['wall'] = read_ubyte(rom)
+                self._objects[-1]['wall'] = rom.read_ubyte()
 
     def generate_dos_map(self):
         """Converts the SNES map data to DOS map format.
@@ -205,13 +206,13 @@ class Map(AbstractEntry):
         print "Saving %d maps to %s" % (len(maps), filename)
         with open(filename, 'wb') as f:
             f.write('WDC3.1')
-            write_int(f, len(maps))
-            write_short(f, Map._PLANE_COUNT)
-            write_short(f, 16) # map name length
+            utils.write_int(f, len(maps))
+            utils.write_short(f, Map._PLANE_COUNT)
+            utils.write_short(f, 16) # map name length
             for m in maps:
                 f.write(m['name'] + '\00' * (16 - len(m['name'])))
-                write_short(f, Map._MAP_SIZE)
-                write_short(f, Map._MAP_SIZE)
+                utils.write_short(f, Map._MAP_SIZE)
+                utils.write_short(f, Map._MAP_SIZE)
                 for p in range(Map._PLANE_COUNT):
                     f.write(struct.pack('<{}H'.format(len(m['tiles'][p])), *m['tiles'][p]))
 

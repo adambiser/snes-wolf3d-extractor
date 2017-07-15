@@ -1,6 +1,6 @@
 from . import AbstractEntry
-from ..utils import *
 from ..pypng import png
+import struct
 
 class Image(AbstractEntry):
     """Represents an image that is loaded from the rom.
@@ -83,12 +83,12 @@ class Image(AbstractEntry):
         raise Exception('Image "{}" was assigned an unknown storage method: {}'.format(self.name, self._storage_method))
 
     @staticmethod
-    def get_linear_8bit(f, width, height):
+    def get_linear_8bit(rom, width, height):
         """Gets pixel data for an 8-bit image made from linear data (column major order)."""
         pixels = [[0 for x in range(width)] for y in range(height)]
         for x in range(width):
             for y in range(height):
-                pixels[y][x] = read_ubyte(f)
+                pixels[y][x] = rom.read_ubyte()
         return pixels
 
     @staticmethod
@@ -97,7 +97,7 @@ class Image(AbstractEntry):
         pixels = [[0 for x in range(width)] for y in range(height)]
         for y in range(height):
             for x in range(width):
-                pixels[y][x] = read_ubyte(rom)
+                pixels[y][x] = rom.read_ubyte()
         return pixels
 
     @staticmethod
@@ -109,7 +109,7 @@ class Image(AbstractEntry):
             tile_y = (tile / tiles_wide) * Image._TILE_SIZE
             for y in range(Image._TILE_SIZE):
                 for x in range(Image._TILE_SIZE):
-                    pixels[tile_y + y][tile_x + x] = read_ubyte(rom)
+                    pixels[tile_y + y][tile_x + x] = rom.read_ubyte()
         return pixels
 
     @staticmethod

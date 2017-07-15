@@ -1,5 +1,4 @@
 from . import AbstractEntry
-from ..utils import *
 
 class Palette(AbstractEntry):
     """Reads a SNES style 15-bit palette and converts to it a 32-bit
@@ -16,7 +15,7 @@ class Palette(AbstractEntry):
         # Check that the palette
         if self.colors is None:
             rom.seek(self.offset)
-            self.colors = [Palette.convert_15bit_to_rgba(read_ushort(rom)) for x in range(256)]
+            self.colors = [Palette.convert_15bit_to_rgba(rom.read_ushort()) for x in range(256)]
 
     def save(self, path, filename=None, filetype=None):
         """Saves the palette data as a 24-bit RGB byte dump."""
