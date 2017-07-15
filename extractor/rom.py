@@ -28,10 +28,10 @@ class Rom:
         # Detect what rom was given.
         self.filename = filename
         self.crc32 = format(self.get_crc32(), '8x')
-        try:
-            rom_info = import_module('.' + self.crc32, 'extractor.roms')
-        except ImportError:
-            raise Exception('Did not find ROM information for "{}" (crc32: {})'.format(filename, self.crc32))
+##        try:
+        rom_info = import_module('.' + self.crc32, 'extractor.roms')
+##        except ImportError:
+##            raise Exception('Did not find ROM information for "{}" (crc32: {})'.format(filename, self.crc32))
         # Load rom information into the rom object.
         with self:
             rom_info.init(self)
@@ -65,11 +65,11 @@ class Rom:
 
     def read_ubyte(self):
         """Reads an unsigned byte."""
-        return struct.unpack('<B', self.f.read(1))[0]
+        return read_ubyte(self)
 
     def read_ushort(self):
         """Reads an unsigned short."""
-        return struct.unpack('<H', selff.read(2))[0]
+        return read_ushort(self)
 
     def seek(self, offset, whence=0):
         """Move to a new position within the rom."""
