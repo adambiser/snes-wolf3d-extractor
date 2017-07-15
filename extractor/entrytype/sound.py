@@ -8,10 +8,6 @@ class Sound(AbstractEntry):
     # Configuration constants
     SAMPLE_RATE = 11025
 
-    '''
-    Constructor.
-    Loads brr sound data from the current position within the rom.
-    '''
     def __init__(self, offset, name, loop_offset=None):
         AbstractEntry.__init__(self, offset, name)
         self.loop_offset = loop_offset
@@ -63,7 +59,7 @@ class Sound(AbstractEntry):
         # There are 4 unknown bytes between these groups.
         first_sound_2_offset = sound_info_offset_1 + 4 + last_sound_1_offset + 4
         rom.seek(sound_info_offset_2)
-        print 'reading sound group 2 at {:x}'.format(rom.tell())
+##        print 'reading sound group 2 at {:x}'.format(rom.tell())
         # First offset is 0.
         sounds.append({})
         sound = sounds[-1]
