@@ -1,12 +1,13 @@
 from . import AbstractEntry
 from .sound import Sound
 import struct
+import textwrap
 
 class InstrumentList(AbstractEntry):
     """The list of instruments used by the game to play music.
 
     Instrument information was found through some guess work and through
-    spc dumps using snes9x
+    spc dumps using snes9x.
     """
     instruments = None
 
@@ -39,19 +40,23 @@ class InstrumentList(AbstractEntry):
             self.instruments[instrument_number] = Instrument(instrument_number, info_offset)
             has_another = (rom.read_ubyte() == 0xc9)
         # Load the instrument sound info.
-##        sound_indices = rom.get_entries_of_class(Sound)
         for info in self.instruments:
             self.instruments[info].load(rom)
 
     def save(self, path, filename=None, filetype=None):
         """There is no save functionality defined for this entry type. Yet."""
-##        filename = self._get_filename(path, filename, self.name + '.txt')
-        pass
+        filename = self._get_filename(path, filename, self.name + '.txt')
+        with open(filename, 'w') as f:
+            f.write(str(self))
+
+    def __str__(self):
+        return '{} instruments:\n\n'.format(len(self.instruments)) + '\n\n'.join([str(self.instruments[i]) for i in sorted(self.instruments)])
 
 class Instrument:
     """An instrument based on a sound from the rom."""
     _info_offset = None
     instrument_number = None
+    sound_number = None
     sound_data = None
     sound_loop_offset = None
     is_percussion = None
@@ -84,13 +89,14 @@ class Instrument:
             assert unknown == '\x0c\x0a\xaa\xbf'
             self.pitch = self.read_ushort_list_at(rom, self.read_3_byte_address(rom), 0x80)
         else:
-            raise Exception('Unexpected value: ' + hex(b2))
+            raise Exception('Unexpected value while loading instrument {}. Tell: 0x{:x}. Value: 0x{:x}'.format(self.instrument_number, rom.tell(), b2))
         # No clue what this is.
         unknown = rom.read(5)
         assert unknown == '\x85\x03\xa6\x0e\xbf'
         self.velocity = self.read_ubyte_list_at(rom, self.read_3_byte_address(rom), 0x80)
         # Load the sound data from the rom.
         sound_info = rom.get_entry(rom.get_entries_of_class(Sound)[sound_number]).get_wav_info()
+        self.sound_number = sound_number
         self.sound_data = sound_info['data']
         self.sound_loop_offset = sound_info['loop_offset']
 
@@ -117,3 +123,13 @@ class Instrument:
         values = struct.unpack('<' + length * 'H', rom.read(length * 2))
         rom.seek(previous_offset)
         return values
+
+    def __str__(self):
+        text = '{} ({}): Sound {}, length: {}, loops at {}\n'.format(self.instrument_number,
+                                                                     'percussion' if self.is_percussion else 'melodic',
+                                                                     self.sound_number,
+                                                                     len(self.sound_data),
+                                                                     self.sound_loop_offset)
+        text += textwrap.fill('Pitch: {}'.format(self.pitch)) + '\n'
+        text += textwrap.fill('Velocity: {}'.format(self.velocity))
+        return text
