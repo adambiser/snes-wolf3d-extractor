@@ -1,5 +1,9 @@
 from ..utils import *
 
+def clamp_short(x):
+    """Clamps a signed short to be within its upper and lower bounds."""
+    return -32768 if x < -32768 else 32767 if x > 32767 else x
+
 class Writer:
     # Configuration constants
     INCLUDE_LOOP_CUE_CHUNK_IN_WAV = True
@@ -38,8 +42,7 @@ class Writer:
         # data chunk
         file.write("data")
         write_int(file, len(sound_data) * self.bytes_per_sample)
-        for s in sound_data:
-            write_short(file, s)
+        file.write(struct.pack('h' * len(sound_data), *sound_data))
         if not loop_offset is None:
             # smpl chunk (put first or Goldwave complains about internal chunk size)
             if Writer.INCLUDE_LOOP_SMPL_CHUNK_IN_WAV:

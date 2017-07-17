@@ -90,11 +90,6 @@ class Sound(AbstractEntry):
         """Converts an unsigned nibble to a signed nibble."""
         return (x | ~7) if (x & 8) else (x & 7)
 
-    @staticmethod
-    def clamp_short(x):
-        """Clamps a signed short to be within its upper and lower bounds."""
-        return -32768 if x < -32768 else 32767 if x > 32767 else x
-
     def get_wav_info(self):
         """Converts the brr sound data to raw 16-bit WAV data.
 
@@ -127,7 +122,7 @@ class Sound(AbstractEntry):
                     elif chunk_filter == 3: 
                         out += (115 / 64.0) * data[-1] - (13 / 16.0) * data[-2]
                     # clamp to 16-bit signed short.
-                    data.append(Sound.clamp_short(int(out)))
+                    data.append(wav.clamp_short(int(out)))
         return {
             'data': data,
             'looping': looping,
