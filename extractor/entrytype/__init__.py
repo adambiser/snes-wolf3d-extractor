@@ -56,7 +56,9 @@ class AbstractEntry:
 # Import entry types.
 from bytedata import ByteData
 from image import Image
+from instrument_list import InstrumentList
 from map import Map
 from palette import Palette
+from song import Song
 from sound import Sound
 from sprite import Sprite
