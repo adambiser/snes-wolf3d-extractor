@@ -49,6 +49,10 @@ class InstrumentList(AbstractEntry):
         with open(filename, 'w') as f:
             f.write(str(self))
 
+    def __getitem__(self, key):
+        """Gets an instrument by MIDI instrument number."""
+        return self.instruments[key]
+
     def __str__(self):
         return '{} instruments:\n\n'.format(len(self.instruments)) + '\n\n'.join([str(self.instruments[i]) for i in sorted(self.instruments)])
 
@@ -57,8 +61,8 @@ class Instrument:
     _info_offset = None
     instrument_number = None
     sound_number = None
-    sound_data = None
-    sound_loop_offset = None
+    data = None
+    loop_offset = None
     is_percussion = None
     pitch = None
     velocity = None
@@ -97,8 +101,8 @@ class Instrument:
         # Load the sound data from the rom.
         sound_info = rom.get_entry(rom.get_entries_of_class(Sound)[sound_number]).get_wav_info()
         self.sound_number = sound_number
-        self.sound_data = sound_info['data']
-        self.sound_loop_offset = sound_info['loop_offset']
+        self.data = sound_info['data']
+        self.loop_offset = sound_info['loop_offset']
 
     def read_3_byte_address(self, rom):
         """Reads a 3 byte rom address (22-bit)."""
@@ -128,8 +132,8 @@ class Instrument:
         text = '{} ({}): Sound {}, length: {}, loops at {}\n'.format(self.instrument_number,
                                                                      'percussion' if self.is_percussion else 'melodic',
                                                                      self.sound_number,
-                                                                     len(self.sound_data),
-                                                                     self.sound_loop_offset)
+                                                                     len(self.data),
+                                                                     self.loop_offset)
         text += textwrap.fill('Pitch: {}'.format(self.pitch)) + '\n'
         text += textwrap.fill('Velocity: {}'.format(self.velocity))
         return text
