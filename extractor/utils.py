@@ -31,6 +31,7 @@ def create_path(path):
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+
 def insert_string(string, index, insert_string):
     """Inserts a string at a given index within another strings."""
     return string[:index] + insert_string + string[index:]
