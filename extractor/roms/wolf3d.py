@@ -13,6 +13,7 @@ _sound_info_offset_1 = None
 _sound_info_offset_2 = None
 _sound_group_2_count = None
 _instrument_info_offset = None
+_song_offset_list_offset = None
 
 def init(rom):
     rom.rom_name = _rom_name
@@ -104,6 +105,7 @@ def init(rom):
                    sprite_info[x]['column_count'], "main"
                    )
             )
+    # Sounds
     sound_info = Sound.read_sound_info(rom, _sound_info_offset_1, _sound_info_offset_2, _sound_group_2_count)
     for x in range(len(sound_info)):
         entry_name = 'sound_{:02d}'.format(x)
@@ -113,6 +115,12 @@ def init(rom):
                    sound_info[x]['loop_offset']
                    )
             )
+    # Songs
+    song_offsets = read_rom_address_list(rom, _song_offset_list_offset, 12)
+    for x in range(len(song_offsets)):
+        entry_name = 'song_{:02d}'.format(x)
+        rom.add_entry(Song(song_offsets[x], entry_name))
+    
 
 def read_rom_address_list(rom, offset, count):
     """Reads a list of addresses in Wolf3D's weird storage method.
