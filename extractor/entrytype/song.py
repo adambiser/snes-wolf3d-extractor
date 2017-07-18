@@ -6,6 +6,9 @@ from ..spc700.tracker import Event
 import struct
 
 class Song(AbstractEntry):
+    """Represents a song. When loaded, the entry consists of an array of
+    Tracker.Event objects which can be passed to the tracker to write a WAV.
+    """
 
     def __init__(self, offset, name):
         AbstractEntry.__init__(self, offset, name)

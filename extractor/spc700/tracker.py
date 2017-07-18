@@ -7,7 +7,7 @@ class Tracker:
     Note: This does not emulate the SPC700 exactly.
     It uses linear interpolation for resampling.
     """
-    VOICE_COUNT = 7
+    VOICE_COUNT = 8
     SAMPLE_RATE = 32000
     
     def __init__(self, instrument_list, sample_rate=SAMPLE_RATE):
@@ -97,6 +97,15 @@ class _Voice:
     _PITCH_BEND_CENTER = 0x80 # 0x80 means no pitch bend.
     TICKS_PER_SECOND = 60
     _COUNT = 0
+    # Note states
+    ATTACK = 0
+    DECAY = 1
+    SUSTAIN = 2
+    RELEASE = 3
+    RATE_TABLE = [ None, 0x800, 0x600, 0x500, 0x400, 0x300, 0x280, 0x200,
+                   0x180, 0x140, 0x100, 0xc0, 0xa0, 0x80, 0x60, 0x50,
+                   0x40, 0x30, 0x28, 0x20, 0x18, 0x14, 0x10, 0xc,
+                   0xa, 0x8, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1]
 
     def __init__(self, sample_rate, total_ticks):
         _Voice._COUNT += 1
@@ -113,12 +122,21 @@ class _Voice:
         self.velocity = None
         self.buffer_pos = 0
         self.tested = 0
+        self.env_state = None
+        self.env_counter = 0
+        self.envelope = 0
+        self.env_vol = 0
+        # These values are from SPC dumps using snes9x. They never seem to change.
+        self.adsr0 = 0xfe
+        self.adsr1 = 0xe9
 
     def get_audio_data(self):
         return self.output
 
     def do_note_on(self, note_number=None, velocity=None):
         self.active = True
+        self.env_state = _Voice.ATTACK
+        self.env_counter = 1
         if not note_number is None:
             self.pitch = self.instrument.pitch[note_number]
         if not velocity is None:
@@ -127,6 +145,7 @@ class _Voice:
 
     def do_note_off(self):
         self.active = False
+        self.env_state = _Voice.RELEASE
         self.pitch_bend = 0
         # Fade note to 0 so there's no clicking.
         if not self.instrument is None:
@@ -172,12 +191,13 @@ class _Voice:
 
     def write_samples(self, output, output_pos, sample_count):
         # Use local variables for faster processing.
+        # Pitch is a 14-bit value. The data has 0x52c2 for one instrument, but this is really 0x12c2.
         sample_step = ((self.pitch & 0x3fff) + (self.pitch_bend * 4)) / 4096.0
         buffer_pos = self.buffer_pos
         inst_data = self.sound_data
         inst_data_len = len(inst_data)
         loop_offset = self.loop_offset
-        volume = self.velocity / 25.0
+        volume = self.velocity / 20.0
         # Now step through the samples.
         for s in range(sample_count):
             if buffer_pos >= inst_data_len:
@@ -194,6 +214,42 @@ class _Voice:
                 sample += inst_data[int_buffer_pos + 1] * (interp_pos)
             elif not loop_offset is None:
                 sample += inst_data[loop_offset] * (interp_pos)
-            output[output_pos + s] = int(sample * volume)
+            self.env_counter -= 1
+            if self.env_counter <= 0:
+                self.do_envelope()
+            output[output_pos + s] = int(sample * volume * self.env_vol)
             buffer_pos += sample_step
         self.buffer_pos = buffer_pos
+
+    def do_envelope(self):
+        # Based on https://github.com/snes9xgit/snes9x/blob/master/apu/bapu/dsp/SPC_DSP.cpp#L206
+        # The rate table used by here is the inverse.
+        envelope = self.envelope
+        if self.env_state == _Voice.RELEASE:
+            rate = 1
+            envelope -= 8
+            if envelope < 0:
+                envelope = 0
+                self.active = False
+        else:
+            # Always ADSR mode, not GAIN.
+            env_data = self.adsr1
+            if self.env_state >= _Voice.DECAY:
+                envelope -= 1
+                envelope -= (envelope >> 8)
+                rate = self.adsr1 & 0x1f
+                if self.env_state == _Voice.DECAY:
+                    rate = (self.adsr0 >> 3 & 0xe) + 0x10
+            else: # ATTACK
+                rate = (self.adsr0 & 0x0f) * 2 + 1
+                envelope += 0x20 if rate < 31 else 0x400
+            if ((envelope >> 8) == (env_data >> 5)) and (self.env_state == _Voice.DECAY):
+		self.env_state = _Voice.SUSTAIN
+	    if envelope > 0x7ff or envelope < 0:
+                envelope = 0 if envelope < 0 else 0x7ff
+                if self.env_state == _Voice.ATTACK:
+                    self.env_state = _Voice.DECAY
+        self.envelope = envelope
+        self.env_vol = envelope / float(0x7ff)
+        self.env_counter = _Voice.RATE_TABLE[rate]
+##        print '{} State {} - {}, {}, {}'.format(self._voice_number, self.env_state, self.envelope, self.env_vol, self.env_counter)

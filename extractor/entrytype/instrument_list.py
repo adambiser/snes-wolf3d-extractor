@@ -8,6 +8,11 @@ class InstrumentList(AbstractEntry):
 
     Instrument information was found through some guess work and through
     spc dumps using snes9x.
+
+    Note that this information also appears at 0xfd7de for the Instrument
+    test screen, but this information is misleading and not used for song
+    playback.  In fact, the Pitch Scale and Velocity Scale values on that
+    screen do not seem to do anything at all, at least in an emulator.
     """
     instruments = None
 
