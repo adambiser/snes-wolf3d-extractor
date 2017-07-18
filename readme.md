@@ -1,7 +1,15 @@
 # SNES Wolfenstein 3D Extractor
 
-This project extracts the images, sounds, maps, etc. from the official and beta releases of Wolfenstein 3D for the Super Nintendo.
-It also supports both the original and Steam releases Super 3D Noah's Ark for the SNES.
+This project extracts the images, sounds, maps, etc. from Wolfenstein 3D and Super 3D Noah's Ark for the Super Nintendo.
+
+Supported games:
+* Wolfenstein 3D (USA)
+* Wolfenstein 3D (Europe)
+* Wolfenstein 3D (Japan)
+* Wolfenstein 3D (Beta 1)
+* Wolfenstein 3D (Beta 2)
+* Super 3D Noah's Ark (1994)
+* Super 3D Noah's Ark (2013/Steam)
 
 Items that are currently exported:
 * Walls
@@ -12,10 +20,10 @@ Items that are currently exported:
 * Weapon overlay pictures
 * Maps
 * Sounds
+* Music
 
 Items not yet exported:
 * Text
-* Music
 
 ## Getting Started
 
