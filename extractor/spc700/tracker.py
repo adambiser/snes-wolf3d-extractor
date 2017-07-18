@@ -1,13 +1,24 @@
 from ..utils import *
 from ..wav import wav
 
+"""
+Various websites that were helpful while trying to make sense of this:
+http://www.gamepilgrimage.com/sites/default/files/SystemSpecs/SNES/anomie/apudsp.txt
+http://pikensoft.com/old/docs/Super_Famicomm_sound_manual_(Ledi).txt
+http://optiroc.github.io/libSFX/files/SMP_Def-i.html
+http://patpend.net/technical/snes/snes.txt
+http://emureview.ztnet.com/developerscorner/SoundCPU/spc.htm
+https://github.com/snes9xgit/snes9x/blob/master/apu/bapu/dsp/SPC_DSP.cpp
+"""
 class Tracker:
     """A simple monoaural tracker for exporting Wolfenstein 3D songs to WAV.
 
     Note: This does not emulate the SPC700 exactly.
     It uses linear interpolation for resampling.
+
+    TODO: Clicking after note-off does still happen sometimes.
     """
-    VOICE_COUNT = 8
+##    VOICE_COUNT = 8
     SAMPLE_RATE = 32000
     
     def __init__(self, instrument_list, sample_rate=SAMPLE_RATE):
@@ -24,26 +35,27 @@ class Tracker:
 
     @staticmethod
     def get_total_ticks(events):
+        """Return the number of ticks in the song."""
         return sum([event.ticks for event in events[1:]])
+
+    @staticmethod
+    def get_voice_count(events):
+        """Return the number of voices needed for the song."""
+        return max([event.voice for event in events[1:]]) + 1
 
     def convert_to_wav(self, events):
         """Converts the song data to wav data."""
         # Calculate total song length now for faster processing.
         total_ticks = Tracker.get_total_ticks(events)
-##        skip_ticks = 25 * 60
-##        total_ticks -= skip_ticks
-        voices = [_Voice(self.sample_rate, total_ticks) for v in range(Tracker.VOICE_COUNT)]
+        voint_count = Tracker.get_voice_count(events)
+        voices = [_Voice(self.sample_rate, total_ticks) for v in range(voint_count)]
         ticks = 0
         # Start at 1 to skip past the instrument list at the beginning.
         for event in events[1:]:
             # Process ticks
             if ticks > 0:
-##                if skip_ticks > 0:
-##                    skip_ticks -= ticks
-##                else:
                 for v in voices:
                     v.process_ticks(ticks)
-##                voices[0].process_ticks(ticks)
                 ticks = 0
             # Process event.
             ticks = event.ticks
@@ -88,6 +100,7 @@ class Event:
 
     @classmethod
     def from_byte(cls, code):
+        """Create an event from a given byte code."""
         return Event((code >> 5) & 7, (code >> 2) & 7, code & 3)
 
     @staticmethod
@@ -95,7 +108,7 @@ class Event:
         return ['Note On', 'Note Off', 'Pitch Bend', 'Change Instrument', 'End Song', 'Percussion Note On'][code - 1] if 1 <= code <= 6 else 'UNKNOWN'
 
     def __str__(self):
-        return 'Voice {}, Ticks {}, Command: {}, args {}'.format(self.voice, self.ticks, Event.get_command_name(self.command), self.args)
+        return 'Voice {}, Ticks {}, Command: {}, args: {}'.format(self.voice, self.ticks, Event.get_command_name(self.command), self.args)
 
 class _Voice:
     """Represents a voice on the SPC700."""
@@ -195,6 +208,7 @@ class _Voice:
         self.output_pos += sample_count
 
     def write_samples(self, output, output_pos, sample_count):
+        """Write audio samples to output at the given output_pos."""
         # Use local variables for faster processing.
         # Pitch is a 14-bit value. The data has 0x52c2 for one instrument, but this is really 0x12c2.
         sample_step = ((self.pitch & 0x3fff) + self.pitch_bend) / 4096.0
@@ -227,10 +241,13 @@ class _Voice:
         self.buffer_pos = buffer_pos
 
     def do_envelope(self):
+        """Do the volume envelope."""
         # Based on https://github.com/snes9xgit/snes9x/blob/master/apu/bapu/dsp/SPC_DSP.cpp#L206
         # The rate table used by here is the inverse.
         envelope = self.envelope
         if self.env_state == _Voice.RELEASE:
+            # This code never really happens here because of how the note off
+            # code is designed.
             rate = 1
             envelope -= 8
             if envelope < 0:
