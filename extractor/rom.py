@@ -1,4 +1,5 @@
 from entrytype import *
+from roms import rom_info
 import binascii
 import struct
 import utils
@@ -29,7 +30,7 @@ class Rom:
         self.filename = filename
         self.crc32 = format(self.get_crc32(), '8x')
 ##        try:
-        rom_info = import_module('.' + self.crc32, 'extractor.roms')
+##        rom_info = import_module('.' + self.crc32, 'extractor.roms')
 ##        except ImportError:
 ##            raise Exception('Did not find ROM information for "{}" (crc32: {})'.format(filename, self.crc32))
         # Load rom information into the rom object.

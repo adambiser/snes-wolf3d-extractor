@@ -12,11 +12,13 @@ Example from S3DNA:
 
 _rom_name = None
 _instrument_info_offset = 0x130
+_starting_offset = 0x76168
 
 def init(rom):
     rom.rom_name = _rom_name
     # If offset is -1, it is assumed to immediately follow the previous entry.
-    rom.add_entry(Palette(0x76168, 'title'))
+    rom.add_entry(InstrumentList(_instrument_info_offset, 'instruments'))
+    rom.add_entry(Palette(_starting_offset, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
     rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
@@ -99,6 +101,11 @@ def init(rom):
                    sound_info[x]['loop_offset']
                    )
             )
+    # Songs
+    for x in range(11):
+        entry_name = 'song_{:02d}'.format(x)
+        entry_offset = rom.read_rom_address_from(0xFD881 + x * 4)
+        rom.add_entry(Song(entry_offset, entry_name))
 
 def read_sprite_info_(rom, column_count_offset, sprite_data_offset):
     """Reads sprite offsets and column counts from the rom.
