@@ -8,14 +8,6 @@ class Image(AbstractEntry):
     Uses PyPNG to save the image data to a png file.
     PyPNG is found at https://github.com/drj11/pypng
     """
-    _storage_method = None
-    _width = None
-    _height = None
-    _palette_name = None
-    _start_color_index = None
-    _transparency_color_index = None
-    _pixels = None
-    _palette_colors = None
     # Image storage method constants.
     LINEAR_8BIT = 1
     LINEAR_8BIT_RMO = 2 # Row Major Order
@@ -31,6 +23,7 @@ class Image(AbstractEntry):
         self._width = width
         self._height = height
         self._palette_name = palette_name
+        self._palette_colors = None
         self._transparency_color_index = transparency_color_index
         self._start_color_index = start_color_index
 

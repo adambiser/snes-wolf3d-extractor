@@ -14,10 +14,10 @@ class InstrumentList(AbstractEntry):
     playback.  In fact, the Pitch Scale and Velocity Scale values on that
     screen do not seem to do anything at all, at least in an emulator.
     """
-    instruments = None
 
     def __init__(self, offset, name):
         AbstractEntry.__init__(self, offset, name)
+        self.instruments = None
 
     def load(self, rom):
         # Only load once.

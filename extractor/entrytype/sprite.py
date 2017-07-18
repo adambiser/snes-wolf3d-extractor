@@ -1,7 +1,6 @@
 from . import Image
 
 class Sprite(Image):
-    _column_count = None
     # Constants
     SPRITE_SIZE = 64
 

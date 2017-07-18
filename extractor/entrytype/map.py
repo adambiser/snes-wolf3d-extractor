@@ -9,10 +9,6 @@ class Map(AbstractEntry):
     """
     # Config settings
     DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS = False
-    # Variables
-    _walls = None
-    _extra_bytes = None # The unknown 64 bytes after the end of the wall data.
-    _objects = None
     # Constants
     _MAP_SIZE = 64
     _PLANE_COUNT = 2

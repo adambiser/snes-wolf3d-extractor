@@ -4,12 +4,12 @@ class Palette(AbstractEntry):
     """Reads a SNES style 15-bit palette and converts to it a 32-bit
     RGBA palette.
     """
-    colors = None
     # Constants
     _DATA_LENGTH = 0x200
 
     def __init__(self, offset, name):
         AbstractEntry.__init__(self, offset, name)
+        self.colors = None
 
     def load(self, rom):
         # Check that the palette

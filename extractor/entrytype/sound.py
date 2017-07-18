@@ -3,8 +3,6 @@ from ..wav import wav
 import struct
 
 class Sound(AbstractEntry):
-    brr = None
-    loop_offset = None
     # Configuration constants
     SAMPLE_RATE = 11025
 

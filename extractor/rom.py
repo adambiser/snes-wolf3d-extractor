@@ -15,24 +15,12 @@ First Map:
 '''
 
 class Rom:
-    crc32 = None
-    filename = None
-    rom_name = None
-    entries = []
-
     def __init__(self, filename):
         """The crc32 of the given file is used to determine which rom information to use."""
-        # 2bebdb00 - beta 2
-        # 9c3869d0 - usa, but starts at 0x200 bytes
-        # 6a455ee2 - europe
-        # cc47b8f9 - japan
         # Detect what rom was given.
         self.filename = filename
         self.crc32 = format(self.get_crc32(), '8x')
-##        try:
-##        rom_info = import_module('.' + self.crc32, 'extractor.roms')
-##        except ImportError:
-##            raise Exception('Did not find ROM information for "{}" (crc32: {})'.format(filename, self.crc32))
+        self.entries = []
         # Load rom information into the rom object.
         with self:
             rom_info.init(self)
