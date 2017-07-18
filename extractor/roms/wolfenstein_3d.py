@@ -14,6 +14,7 @@ _sound_info_offset_2 = None
 _sound_group_2_count = None
 _instrument_info_offset = None
 _song_offset_list_offset = None
+_is_japan = False
 
 def init(rom):
     rom.rom_name = _rom_name
@@ -29,8 +30,16 @@ def init(rom):
     rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
     rom.add_entry(Palette(-1, 'briefing'))
-    rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
-    rom.add_entry(Image(-1, 'mission_briefing', Image.PLANAR_8BIT, 32, 24, "briefing"))
+    if _is_japan:
+        rom.add_entry(Image(-1, 'mission_intro_1', Image.PLANAR_8BIT, 30, 4, "briefing"))
+        rom.add_entry(Image(-1, 'mission_intro_2', Image.PLANAR_8BIT, 20, 4, "briefing"))
+        rom.add_entry(Image(-1, 'mission_intro_3', Image.PLANAR_8BIT, 30, 4, "briefing"))
+        rom.add_entry(Image(-1, 'mission_intro_4', Image.PLANAR_8BIT, 27, 4, "briefing"))
+        rom.add_entry(Image(-1, 'mission_intro_5', Image.PLANAR_8BIT, 13, 4, "briefing"))
+        rom.add_entry(Image(-1, 'mission_intro_6', Image.PLANAR_8BIT, 23, 4, "briefing"))
+    else:
+        rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
+        rom.add_entry(Image(-1, 'mission_briefing', Image.PLANAR_8BIT, 32, 24, "briefing"))
     rom.add_entry(Palette(-1, 'intermission'))
     rom.add_entry(Image(-1, 'intermission_background', Image.PLANAR_4BIT, 8, 8, "intermission", 0x50))
     rom.add_entry(Image(-1, 'intermission_player', Image.PLANAR_4BIT, 11, 33, "intermission", 0x00))
