@@ -2,8 +2,6 @@ from . import AbstractEntry
 
 class ByteData(AbstractEntry):
     """This class is just a byte array read directly from the ROM."""
-    _data = None
-    _length = None
 
     def __init__(self, offset, name, length):
         AbstractEntry.__init__(self, offset, name)
@@ -11,7 +9,7 @@ class ByteData(AbstractEntry):
 
     def load(self, rom):
         rom.seek(self.offset)
-        self._data = rom.read(length)
+        self._data = rom.read(self._length)
 
     def save(self, path, filename=None, filetype=None):
         filename = self._get_filename(path, filename, '{}_0x{:x}.bin'.format(self.name, self.offset))
