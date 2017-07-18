@@ -30,12 +30,17 @@ class Tracker:
         """Converts the song data to wav data."""
         # Calculate total song length now for faster processing.
         total_ticks = Tracker.get_total_ticks(events)
+##        skip_ticks = 25 * 60
+##        total_ticks -= skip_ticks
         voices = [_Voice(self.sample_rate, total_ticks) for v in range(Tracker.VOICE_COUNT)]
         ticks = 0
         # Start at 1 to skip past the instrument list at the beginning.
         for event in events[1:]:
             # Process ticks
             if ticks > 0:
+##                if skip_ticks > 0:
+##                    skip_ticks -= ticks
+##                else:
                 for v in voices:
                     v.process_ticks(ticks)
 ##                voices[0].process_ticks(ticks)
@@ -149,7 +154,7 @@ class _Voice:
         self.pitch_bend = 0
         # Fade note to 0 so there's no clicking.
         if not self.instrument is None:
-            sample_count = 16 #self.samples_per_tick_output / 2
+            sample_count = 50
             fade_buffer = [0] * sample_count
             self.write_samples(fade_buffer, 0, sample_count)
             fade_buffer = [int(fade_buffer[x] * ((sample_count - x) / float(sample_count))) for x in range(sample_count)]
@@ -160,7 +165,7 @@ class _Voice:
             self.fade_buffer = fade_buffer
 
     def do_pitch_bend(self, amount):
-        self.pitch_bend = amount - _Voice._PITCH_BEND_CENTER
+        self.pitch_bend = int(self.pitch * (-(0x80 - amount) / 1024.0))
 
     def change_instrument(self, instrument):
         self.do_note_off()
@@ -192,7 +197,7 @@ class _Voice:
     def write_samples(self, output, output_pos, sample_count):
         # Use local variables for faster processing.
         # Pitch is a 14-bit value. The data has 0x52c2 for one instrument, but this is really 0x12c2.
-        sample_step = ((self.pitch & 0x3fff) + (self.pitch_bend * 4)) / 4096.0
+        sample_step = ((self.pitch & 0x3fff) + self.pitch_bend) / 4096.0
         buffer_pos = self.buffer_pos
         inst_data = self.sound_data
         inst_data_len = len(inst_data)
