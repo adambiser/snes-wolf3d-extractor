@@ -35,7 +35,7 @@ def main():
     output_path = "output"
     with Rom(ROM_FILE_NAME) as rom:
         # Create rom-specific output path
-        output_path += '_' + rom.rom_name #os.path.splitext(os.path.basename(rom.filename))[0]
+        output_path += '/' + rom.rom_name #os.path.splitext(os.path.basename(rom.filename))[0]
         utils.create_path(output_path)
         # Testing
 ##        rom.get_entry(rom.get_entries_of_class(Song)[2]).save(output_path)
