@@ -4,7 +4,7 @@ from tkFileDialog import askopenfilename
 class RomFrame(tk.Frame):
     def __init__(self, parent, settings, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
-        # Settings
+        self.parent = parent
         self.settings = settings
         # Widget creation.
         self.rom_label = tk.Label(self, text='ROM:')
