@@ -14,6 +14,12 @@ First Map:
 - Search for the hex values of this offset + 0xc00000.
 '''
 
+class RomInfoNotFoundError(Exception):
+    """The error raised when ROM info is not found for the given CRC32."""
+    def __init__(self, crc32, *args):
+        super(RomInfoNotFoundError, self).__init__(crc32, *args)
+        self.crc32 = crc32
+
 class Rom:
     def __init__(self, filename):
         """The crc32 of the given file is used to determine which rom information to use."""
