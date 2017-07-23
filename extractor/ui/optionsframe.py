@@ -1,6 +1,7 @@
 import Tkinter as tk
 
 class OptionsFrame(tk.LabelFrame):
+    COLUMNS = 3
     def __init__(self, parent, settings, **options): # *args, **kwargs):
         tk.LabelFrame.__init__(self, parent, **options) #*args, **kwargs)
 ##        self.config(borderwidth=1
@@ -18,8 +19,8 @@ class OptionsFrame(tk.LabelFrame):
             self.checkbuttons.append(chk)
             self.checkbuttons[-1].grid(row=row, column=col, sticky=tk.W)
             col += 1
-            if col == 3:
+            if col == OptionsFrame.COLUMNS:
                 row += 1
                 col = 0
-        for x in range(3):
+        for x in range(OptionsFrame.COLUMNS):
             tk.Grid.columnconfigure(self, x, weight=1)
