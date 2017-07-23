@@ -32,6 +32,7 @@ def rom_6582a8f5(rom):
     base._sound_group_2_count = 5
     base._instrument_info_offset = 0x8b
     base._song_offset_list_offset = 0xfd7a1
+    base._is_japan = False
     base.init(rom)
 
 def rom_6a455ee2(rom):
@@ -47,6 +48,7 @@ def rom_6a455ee2(rom):
     base._sound_group_2_count = 5
     base._instrument_info_offset = 0x9c
     base._song_offset_list_offset = 0xfd7a1
+    base._is_japan = False
     base.init(rom)
     
 def rom_cc47b8f9(rom):
@@ -78,6 +80,7 @@ def rom_63e442b4(rom):
     base._sound_group_2_count = 5
     base._instrument_info_offset = 0xd
     base._song_offset_list_offset = 0xFC77A
+    base._is_japan = False
     base.init(rom)
 
 def rom_2bebdb00(rom):
@@ -93,6 +96,7 @@ def rom_2bebdb00(rom):
     base._sound_group_2_count = 5
     base._instrument_info_offset = 0x8b
     base._song_offset_list_offset = 0xFCF87
+    base._is_japan = False
     base.init(rom)
 
 ############################################

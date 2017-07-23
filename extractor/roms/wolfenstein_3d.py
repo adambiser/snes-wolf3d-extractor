@@ -14,7 +14,7 @@ _sound_info_offset_2 = None
 _sound_group_2_count = None
 _instrument_info_offset = None
 _song_offset_list_offset = None
-_is_japan = False
+_is_japan = None
 
 def init(rom):
     rom.rom_name = _rom_name
