@@ -1,7 +1,7 @@
 # TODO
 # 9c3869d0 - usa, but starts at 0x200 bytes
 
-from extractor.rom import RomInfoNotFoundError
+from extractor.exceptions import RomInfoNotFoundError
 
 ############################################
 # Super 3D Noah's Ark

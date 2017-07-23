@@ -1,4 +1,5 @@
-from extractor.rom import Rom, RomInfoNotFoundError
+from extractor.rom import Rom
+from extractor.exceptions import RomInfoNotFoundError
 import Tkinter as tk
 from tkFileDialog import askopenfilename
 import tkMessageBox
@@ -9,6 +10,9 @@ class RomFrame(tk.Frame):
         self.parent = parent
         self.settings = settings
         self.settings.rom_file.trace("w", self.rom_changed)
+        self.rom_name = tk.StringVar()
+        self.rom_crc32 = tk.StringVar()
+        self.is_valid_rom = tk.BooleanVar(False)
         # Widget creation.
         # Row 0
         tk.Label(self,
@@ -42,7 +46,6 @@ class RomFrame(tk.Frame):
                         column=0,
                         sticky=tk.W,
                         )
-        self.rom_name = tk.StringVar()
         tk.Label(self,
                  textvariable=self.rom_name,
                  anchor=tk.W,
@@ -58,7 +61,6 @@ class RomFrame(tk.Frame):
                         column=0,
                         sticky=tk.W,
                         )
-        self.rom_crc32 = tk.StringVar()
         tk.Label(self,
                  textvariable=self.rom_crc32,
                  anchor=tk.W,
@@ -94,11 +96,13 @@ class RomFrame(tk.Frame):
             with Rom(rom_file) as rom:
                 self.rom_name.set(rom.rom_name)
                 self.rom_crc32.set(rom.crc32)
-                print rom.get_entry_count()
+                self.is_valid_rom.set(True)
+##                print rom.get_entry_count()
 ##                self.entry_listbox.delete(0, tk.END)
 ##                for entry in rom.get_entry_list():
 ##                    self.entry_listbox.insert(tk.END, '0x{:x} - {} - {}'.format(entry[0], entry[1], entry[2]))
         except RomInfoNotFoundError as e:
+            self.is_valid_rom.set(False)
             self.rom_name.set('Could not find ROM information.')
             self.rom_crc32.set(e.crc32)
 ##            print 'Exception!'
