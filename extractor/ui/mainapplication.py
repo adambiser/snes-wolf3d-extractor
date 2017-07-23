@@ -3,29 +3,30 @@ from .romframe import RomFrame
 from .optionsframe import OptionsFrame
 from .settings import Settings
 
-class MainApplication(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+class MainApplication(tk.Tk):
+    def __init__(self, screenName=None, baseName=None, className='Tk', useTk=1):
         # Set up the window.
-        tk.Frame.__init__(self, parent, *args, **kwargs)
-        self.parent = parent
-        self.parent.protocol("WM_DELETE_WINDOW", self.on_closing)
+        tk.Tk.__init__(self, screenName, baseName, className, useTk)
+        self.title('SNES Wolfenstein 3D Extractor')
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.settings = Settings()
         # Widget creation.
-        self.rom_frame = RomFrame(self)
+        self.rom_frame = RomFrame(self, self.settings)
         self.options_frame = OptionsFrame(self)
         # Perform layout.
-        self.rom_frame.pack(fill=tk.X)
+        self.rom_frame.pack(anchor=tk.NW, fill=tk.X)
         self.options_frame.pack(fill=tk.X)
         self.pad_children(self, 5)
         # Load settings.
-        self.rom_frame.load_settings(self.settings)
-##        self.rom_frame.set_rom_file(self.settings.rom_file)
-##        self.options_frame.set_settings(self.settings.export)
+##        self.rom_frame.load_settings(self.settings)
+##        self.options_frame.load_settings(self.settings)
+        self.minsize(400, 100)
 
     def on_closing(self):
-        self.settings.save()
-        self.parent.destroy()
+##        self.settings.save()
+        self.destroy()
 
     def pad_children(self, parent, pad):
         for widget in parent.winfo_children():
-            widget.grid(padx=pad, pady=pad)
+            widget.pack(padx=pad, pady=pad)
+##            self.pad_children(widget, pad)
