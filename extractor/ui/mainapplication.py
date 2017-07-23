@@ -18,8 +18,8 @@ class MainApplication(tk.Tk):
         self.rom_frame.pack(anchor=tk.NW, fill=tk.X, **pad)
         self.options_frame.pack(fill=tk.X, **pad)
 ##        self.pad_children(self, 5)
-        self.minsize(500, 200)
-        self.center_window(500, 200)
+        self.minsize(500, 400)
+        self.center_window(500, 400)
 
     def on_closing(self):
         self.settings.save()
