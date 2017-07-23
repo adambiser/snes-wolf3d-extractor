@@ -77,10 +77,12 @@ class Rom:
             entry.offset = self.entries[-1].offset + self.entries[-1]._get_length()
         self.entries.append(entry)
 
+    def get_entry_list(self):
+        return sorted((entry.offset, entry.__class__.__name__, entry.name) for entry in self.entries)
+
     def print_entry_list(self):
         """Prints the list of entries (offset and name) sorted by offset."""
-        entries = sorted((entry.offset, entry.__class__.__name__, entry.name) for entry in self.entries)
-        for e in entries:
+        for e in self.get_entry_list():
             print '0x{:x} - {} - {}'.format(e[0], e[1], e[2])
 
     def get_entry_count(self):
