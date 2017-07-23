@@ -1,5 +1,7 @@
+from extractor.rom import Rom
 import Tkinter as tk
 from tkFileDialog import askopenfilename
+import tkMessageBox
 
 class RomFrame(tk.Frame):
     def __init__(self, parent, settings, *args, **kwargs):
@@ -15,6 +17,7 @@ class RomFrame(tk.Frame):
         self.rom_file_label.grid(row=0, column=1, sticky=tk.W+tk.E, padx=5)
         self.select_rom_button.grid(row=0, column=2, sticky=tk.E)
         tk.Grid.columnconfigure(self, 1, weight=1)
+        self.set_rom_file(settings.rom_file.get())
 
     def select_rom(self):
         self.set_rom_file(askopenfilename(
@@ -27,3 +30,9 @@ class RomFrame(tk.Frame):
         if rom_file == '':
             return
         self.settings.rom_file.set(rom_file)
+        try:
+            with Rom(rom_file) as rom:
+                print rom.get_entry_count()
+        except:
+            tkMessageBox.showerror("Error", "Error loading ROM information.")
+        
