@@ -13,34 +13,39 @@ class Settings():
     CONFIG_FILE = 'config.json'
 
     def __init__(self):
+        self.rom_file = tk.StringVar()
+        self.export = dict([(key,tk.IntVar(value=1)) for key in Settings.get_export_types()])
         self.load()
 
     def load(self):
-        settings = {}
         if os.path.exists(Settings.CONFIG_FILE):
             with open(Settings.CONFIG_FILE, 'r') as f:
-                settings = json.load(f)
-        self.from_dict(settings)
+                self.from_dict(json.load(f))
 
     def save(self):
         with open(Settings.CONFIG_FILE, 'w') as f:
             json.dump(self.to_dict(), f, indent=4, separators=(',', ': '))
 
     def to_dict(self):
-        settings = { 'rom_file': self.rom_file }
-        settings['export'] = {key:value.get() if isinstance(value, tk.IntVar) else value for key, value in self.export.items()}
+        settings = { 'rom_file': self.rom_file.get() }
+##        settings['export'] = {key:value.get() if isinstance(value, tk.IntVar) else value for key, value in self.export.items()}
+        settings['export'] = {key:value.get() for key, value in self.export.items()}
         return settings
 
     def from_dict(self, settings):
-        self.rom_file = settings.get('rom_file', '')
+        self.rom_file.set(settings.get('rom_file', ''))
         export = settings.get('export', {})
-        self.export = dict([(key,tk.IntVar(value=export.get(key, 1))) for key in Settings.get_export_types()])
+        for key in Settings.get_export_types():
+            self.export[key].set(export.get(key, 1))
 
     @staticmethod
     def get_export_types():
         cls = list({name for name, cls in globals().items() if inspect.isclass(cls) and cls != AbstractEntry and issubclass(cls, AbstractEntry)})
         cls.sort()
         return cls
+
+def callback(*args):
+    print "variable changed!"
 
 # For testing.
 if __name__ == "__main__":
@@ -49,6 +54,7 @@ if __name__ == "__main__":
     print Settings.get_export_types()
     print
     settings = Settings()
+    settings.rom_file.trace('w', callback)
     settings.from_dict({'rom_file':'folder/file.sfc', 'export': {'Sprite': 0}})
     print "json encode: "
     print json.JSONEncoder(indent=4, separators=(',', ': ')).encode(settings.to_dict())
