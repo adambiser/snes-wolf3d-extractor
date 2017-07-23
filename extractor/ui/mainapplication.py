@@ -12,7 +12,7 @@ class MainApplication(tk.Tk):
         self.settings = Settings()
         # Widget creation.
         self.rom_frame = RomFrame(self, self.settings)
-        self.options_frame = OptionsFrame(self)
+        self.options_frame = OptionsFrame(self, self.settings)
         # Perform layout.
         pad = {'padx':5, 'pady':5}
         self.minsize(400, 100)
@@ -21,7 +21,7 @@ class MainApplication(tk.Tk):
 ##        self.pad_children(self, 5)
 
     def on_closing(self):
-##        self.settings.save()
+        self.settings.save()
         self.destroy()
 
 ##    def pad_children(self, parent, pad):
