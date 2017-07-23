@@ -14,19 +14,17 @@ class MainApplication(tk.Tk):
         self.rom_frame = RomFrame(self, self.settings)
         self.options_frame = OptionsFrame(self)
         # Perform layout.
-        self.rom_frame.pack(anchor=tk.NW, fill=tk.X)
-        self.options_frame.pack(fill=tk.X)
-        self.pad_children(self, 5)
-        # Load settings.
-##        self.rom_frame.load_settings(self.settings)
-##        self.options_frame.load_settings(self.settings)
+        pad = {'padx':5, 'pady':5}
         self.minsize(400, 100)
+        self.rom_frame.pack(anchor=tk.NW, fill=tk.X, **pad)
+        self.options_frame.pack(fill=tk.X, **pad)
+##        self.pad_children(self, 5)
 
     def on_closing(self):
 ##        self.settings.save()
         self.destroy()
 
-    def pad_children(self, parent, pad):
-        for widget in parent.winfo_children():
-            widget.pack(padx=pad, pady=pad)
+##    def pad_children(self, parent, pad):
+##        for widget in parent.winfo_children():
+##            widget.pack(padx=pad, pady=pad)
 ##            self.pad_children(widget, pad)
