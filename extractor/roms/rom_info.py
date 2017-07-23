@@ -1,6 +1,8 @@
 # TODO
 # 9c3869d0 - usa, but starts at 0x200 bytes
 
+from extractor.rom import RomInfoNotFoundError
+
 ############################################
 # Super 3D Noah's Ark
 ############################################
@@ -103,4 +105,7 @@ def rom_2bebdb00(rom):
 # Main init function.
 ############################################
 def init(rom):
-    globals()['rom_' + rom.crc32](rom)
+    try:
+        globals()['rom_' + rom.crc32](rom)
+    except KeyError as e:
+        raise RomInfoNotFoundError(rom.crc32)
