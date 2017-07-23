@@ -48,6 +48,7 @@ class RomFrame(tk.Frame):
                         )
         tk.Label(self,
                  textvariable=self.rom_name,
+                 name='rom_name_label',
                  anchor=tk.W,
                  ).grid(row=1,
                         column=1,
@@ -91,10 +92,13 @@ class RomFrame(tk.Frame):
             self.settings.rom_file.set(rom_file)
 
     def rom_changed(self, *args):
+        rom_name_label = self.children['rom_name_label']
         try:
             rom_file = self.settings.rom_file.get()
             with Rom(rom_file) as rom:
                 self.rom_name.set(rom.rom_name)
+                rom_name_label['background'] = ''
+                rom_name_label['foreground'] = ''
                 self.rom_crc32.set(rom.crc32)
                 self.is_valid_rom.set(True)
 ##                print rom.get_entry_count()
@@ -102,10 +106,9 @@ class RomFrame(tk.Frame):
 ##                for entry in rom.get_entry_list():
 ##                    self.entry_listbox.insert(tk.END, '0x{:x} - {} - {}'.format(entry[0], entry[1], entry[2]))
         except RomInfoNotFoundError as e:
-            self.is_valid_rom.set(False)
             self.rom_name.set('Could not find ROM information.')
+            rom_name_label['background'] = 'red'
+            rom_name_label['foreground'] = 'white'
             self.rom_crc32.set(e.crc32)
-##            print 'Exception!'
-##            print type(e)
-##            print e
-####            tkMessageBox.showerror("Error", "Error loading ROM information.")
+            self.is_valid_rom.set(False)
+##            tkMessageBox.showerror("Error", "Error loading ROM information.")
