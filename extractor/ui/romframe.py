@@ -12,7 +12,7 @@ class RomFrame(tk.Frame):
         self.select_rom_button = tk.Button(self, text='Select ROM', command=self.select_rom)
         # Perform layout.
         self.rom_label.grid(row=0, column=0, sticky=tk.W)
-        self.rom_file_label.grid(row=0, column=1, sticky=tk.W+tk.E)
+        self.rom_file_label.grid(row=0, column=1, sticky=tk.W+tk.E, padx=5)
         self.select_rom_button.grid(row=0, column=2, sticky=tk.E)
         tk.Grid.columnconfigure(self, 1, weight=1)
 
