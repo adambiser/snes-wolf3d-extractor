@@ -1,8 +1,11 @@
-# Hide input files
+# Hide input folder
 input/
 
-# Hide output folders
-output*/
+# Hide output folder
+output/
+
+# Hide config file.
+config.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
