@@ -28,11 +28,11 @@ class Settings():
 
     def to_dict(self):
         settings = { 'rom_file': self.rom_file.get() }
-##        settings['export'] = {key:value.get() if isinstance(value, tk.IntVar) else value for key, value in self.export.items()}
         settings['export'] = {key:value.get() for key, value in self.export.items()}
         return settings
 
     def from_dict(self, settings):
+        # Be sure to use .set so that the only variable value updates and the variable reference doesn't change.
         self.rom_file.set(settings.get('rom_file', ''))
         export = settings.get('export', {})
         for key in Settings.get_export_types():
@@ -44,17 +44,19 @@ class Settings():
         cls.sort()
         return cls
 
-def callback(*args):
-    print "variable changed!"
-
 # For testing.
 if __name__ == "__main__":
+    def callback(*args):
+        print 'Trace callback: ',
+        print args
+
     root = tk.Tk()
     print "get_export_types: "
     print Settings.get_export_types()
     print
     settings = Settings()
     settings.rom_file.trace('w', callback)
+    settings.export['Sprite'].trace('w', callback)
     settings.from_dict({'rom_file':'folder/file.sfc', 'export': {'Sprite': 0}})
     print "json encode: "
     print json.JSONEncoder(indent=4, separators=(',', ': ')).encode(settings.to_dict())
