@@ -15,7 +15,7 @@ class MainApplication(tk.Tk):
         self.options_frame = OptionsFrame(self, self.settings)
         # Perform layout.
         pad = {'padx':5, 'pady':5}
-        self.rom_frame.pack(anchor=tk.NW, fill=tk.X, **pad)
+        self.rom_frame.pack(anchor=tk.NW, fill=tk.BOTH, expand=1, **pad)
         self.options_frame.pack(fill=tk.X, **pad)
 ##        self.pad_children(self, 5)
         self.minsize(500, 400)

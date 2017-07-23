@@ -12,13 +12,19 @@ class RomFrame(tk.Frame):
         self.rom_label = tk.Label(self, text='ROM:')
         self.rom_file_label = tk.Label(self, textvariable=self.settings.rom_file, width=60, borderwidth=1, relief=tk.SUNKEN, anchor=tk.W)
         self.select_rom_button = tk.Button(self, text='Select ROM', command=self.select_rom)
-        self.entry_listbox = tk.Listbox(self)
+        self.lb_frame = tk.Frame(self)
+        self.lb_scrollbar = tk.Scrollbar(self.lb_frame, orient=tk.VERTICAL)
+        self.entry_listbox = tk.Listbox(self.lb_frame, yscrollcommand=self.lb_scrollbar.set)
+        self.lb_scrollbar.config(command=self.entry_listbox.yview)
         # Perform layout.
         self.rom_label.grid(row=0, column=0, sticky=tk.W)
         self.rom_file_label.grid(row=0, column=1, sticky=tk.W+tk.E, padx=5)
         self.select_rom_button.grid(row=0, column=2, sticky=tk.E)
-        self.entry_listbox.grid(row=1, column=0, columnspan=3, sticky=tk.W+tk.E)
+        self.lb_frame.grid(row=1, column=0, columnspan=3, sticky=tk.W+tk.E+tk.N+tk.S)
+        self.lb_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.entry_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         tk.Grid.columnconfigure(self, 1, weight=1)
+        tk.Grid.rowconfigure(self, 1, weight=1)
         self.set_rom_file(settings.rom_file.get())
 
     def select_rom(self):
