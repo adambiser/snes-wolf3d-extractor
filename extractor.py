@@ -6,7 +6,7 @@ def main():
 ##    root.title('SNES Wolfenstein 3D Extractor')
 ##    root.minsize(400, 100)
 ##    ui.MainApplication(root).pack(side="top", fill="both", expand=True)
-##    root.mainloop()
-    ui.MainApplication().mainloop()
+    root = ui.MainApplication()
+    root.mainloop()
 
 main()
