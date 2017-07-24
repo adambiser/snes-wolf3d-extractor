@@ -14,6 +14,7 @@ class Settings():
 
     def __init__(self):
         self.rom_file = tk.StringVar()
+        self.output_folder = tk.StringVar(value=os.getcwd())
         self.export = dict([(key,tk.IntVar(value=1)) for key in Settings.get_export_types()])
         self.load()
 
@@ -27,13 +28,17 @@ class Settings():
             json.dump(self.to_dict(), f, indent=4, separators=(',', ': '))
 
     def to_dict(self):
-        settings = { 'rom_file': self.rom_file.get() }
+        settings = {
+            'rom_file': self.rom_file.get(),
+            'output_folder': self.output_folder.get(),
+            }
         settings['export'] = {key:value.get() for key, value in self.export.items()}
         return settings
 
     def from_dict(self, settings):
         # Be sure to use .set so that the only variable value updates and the variable reference doesn't change.
         self.rom_file.set(settings.get('rom_file', ''))
+        self.output_folder.set(settings.get('output_folder', os.getcwd()))
         export = settings.get('export', {})
         for key in Settings.get_export_types():
             self.export[key].set(export.get(key, 1))
