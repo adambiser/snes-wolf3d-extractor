@@ -8,6 +8,7 @@ from settings import Settings
 from statustext import StatusText
 from extractor.rom import Rom
 from extractor.entrytype import *
+import extractor.utils as utils
 
 class MainApplication(tk.Tk):
     def __init__(self, screenName=None, baseName=None, className='Tk', useTk=1):
@@ -32,26 +33,23 @@ class MainApplication(tk.Tk):
                             fill=tk.X,
                             **pad
                             )
-##        self.status = StatusText(self,
-####                              state=tk.DISABLED,
-##                              )
-##        self.status.pack(anchor=tk.NW,
-##                         fill=tk.BOTH,
-##                         expand=1,
-##                         **pad
-##                         )
-##        for x in range(10):
-##            self.status.appendline('test {}'.format(x))
-##        self.status.config(state=tk.DISABLED)
+        self.status = StatusText(self)
+        self.status.pack(anchor=tk.NW,
+                         fill=tk.BOTH,
+                         expand=1,
+                         **pad
+                         )
         tk.Button(self,
                   text='Export',
                   name='export_button',
                   command=self.export,
-                  ).pack(fill=tk.X,
+                  ).pack(anchor=tk.NW,
+                         side=tk.BOTTOM,
+                         fill=tk.X,
                          **pad
                          )
-        self.minsize(500, 220)
-        self.center_window(500, 220)
+        self.minsize(500, 400)
+        self.center_window(500, 400)
         # Force this code to run.
         self.on_rom_valid_changed()
 
@@ -68,34 +66,45 @@ class MainApplication(tk.Tk):
         y = (self.winfo_screenheight() - height) / 2
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
+    def add_status(self, text):
+        self.status.appendline(text)
+        self.update()
+
     def export(self):
         folder = askdirectory(title='Choose output directory.\nThe files will appear in a subfolder.',
-                              initialdir=self.settings.output_folder.get(),
-                              mustexist=1,
+                              initialdir=self.settings.export_folder.get(),
+                              mustexist=True,
                               parent=self,
                               )
         if not folder:
             return
-        if os.listdir(folder):
-            print 'Export folder not empty.'
-            if not tkMessageBox.askyesno('Confirmation', 'The folder does not appear to be empty. Continue?'):
-                print 'Aborted.'
-                return
-            print 'Confirmed.'
-        print 'Exporting to: ' + folder
-        self.config(cursor='wait')
-        self.settings.output_folder.set(folder)
-        export_classes = self.settings.get_export_class_list()
         with Rom(self.settings.rom_file.get()) as rom:
+            export_folder = folder
+            if self.settings.export_to_subfolder.get():
+                export_folder = os.path.join(export_folder, rom.rom_name)
+                utils.create_path(export_folder)
+            self.add_status('Exporting to: ' + export_folder)
+            if os.listdir(export_folder):
+                self.add_status('Export folder not empty.')
+                if not tkMessageBox.askyesno('Confirmation', 'The folder does not appear to be empty. Continue?'):
+                    self.add_status('Aborted.')
+                    return
+                self.add_status('Confirmed.')
+            self.config(cursor='wait')
+            # Save folder without generated subfolder.
+            self.settings.export_folder.set(folder)
+            export_classes = self.settings.get_export_class_list()
             # Save maps in a single file.
-            if Map in export_classes:
+            if self.settings.combine_maps.get() and Map in export_classes:
                 gamemaps = [rom.get_entry(m).generate_dos_map() for m in rom.get_entries_of_class(Map)]
-                Map.save_as_wdc_map_file(folder + "/snes.map", gamemaps)
+                self.add_status('Exporting: {} maps to Maps.map'.format(len(gamemaps)))
+                Map.save_as_wdc_map_file(export_folder + "/Maps.map", gamemaps)
             for index in range(rom.get_entry_count()):
-                if rom.get_entry_type(index) is Map:
-                    continue
                 if rom.get_entry_type(index) in export_classes:
+                    if rom.get_entry_type(index) is Map and self.settings.combine_maps.get():
+                        continue
                     entry = rom.get_entry(index)
-                    print '0x{:x} - {}'.format(entry.offset, entry.name)
-                    entry.save(folder)
+                    self.add_status('Exporting: 0x{:x} - {}'.format(entry.offset, entry.name))
+                    entry.save(export_folder)
         self.config(cursor='')
+        self.add_status('Done')
