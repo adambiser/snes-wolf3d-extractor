@@ -10,14 +10,20 @@ class MainApplication(tk.Tk):
         self.title('SNES Wolfenstein 3D Extractor')
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.settings = Settings()
-        # Widget creation.
-        self.rom_frame = RomFrame(self, self.settings)
-        self.options_frame = OptionsFrame(self, self.settings)
-        # Perform layout.
+        # Add widgets
         pad = {'padx':5, 'pady':5}
-        self.rom_frame.pack(anchor=tk.NW, fill=tk.X, **pad)
-        self.options_frame.pack(anchor=tk.NW, fill=tk.X, **pad)
-##        self.pad_children(self, 5)
+        RomFrame(self,
+                 self.settings
+                 ).pack(anchor=tk.NW,
+                        fill=tk.X,
+                        **pad
+                        )
+        OptionsFrame(self,
+                     self.settings
+                     ).pack(anchor=tk.NW,
+                            fill=tk.X,
+                            **pad
+                            )
         self.minsize(500, 400)
         self.center_window(500, 400)
 
@@ -25,16 +31,7 @@ class MainApplication(tk.Tk):
         self.settings.save()
         self.destroy()
 
-##    def pad_children(self, parent, pad):
-##        for widget in parent.winfo_children():
-##            widget.pack(padx=pad, pady=pad)
-##            self.pad_children(widget, pad)
-
     def center_window(self, width, height):
-        screenwidth = self.winfo_screenwidth()
-        screenheight = self.winfo_screenheight()
-
-        # calculate position x and y coordinates
-        x = (screenwidth - width) / 2
-        y = (screenheight - height) / 2
+        x = (self.winfo_screenwidth() - width) / 2
+        y = (self.winfo_screenheight() - height) / 2
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))

@@ -12,8 +12,9 @@ class RomFrame(tk.Frame):
         self.settings.rom_file.trace("w", self.rom_changed)
         self.rom_name = tk.StringVar()
         self.rom_crc32 = tk.StringVar()
+        self.entry_count = tk.IntVar()
         self.is_valid_rom = tk.BooleanVar(False)
-        # Widget creation.
+        # Add widgets.
         # Row 0
         tk.Label(self,
                  text='ROM:',
@@ -29,14 +30,15 @@ class RomFrame(tk.Frame):
                  anchor=tk.W,
                  ).grid(row=0,
                         column=1,
+                        columnspan=3,
                         sticky=tk.W+tk.E,
-                        padx=5,
+                        padx=(5, 5),
                         )
         tk.Button(self,
                   text='Select',
                   command=self.select_rom,
                   ).grid(row=0,
-                         column=2,
+                         column=4,
                          sticky=tk.E,
                          )
         # Row 1
@@ -52,21 +54,36 @@ class RomFrame(tk.Frame):
                  anchor=tk.W,
                  ).grid(row=1,
                         column=1,
+                        columnspan=4,
                         sticky=tk.W+tk.E,
-                        padx=5,
+                        padx=(5, 0),
                         )
         # Row 2
         tk.Label(self,
-                 text='CRC32:',
+                 text='Entries:',
                  ).grid(row=2,
                         column=0,
+                        sticky=tk.W,
+                        )
+        tk.Label(self,
+                 textvariable=self.entry_count,
+                 anchor=tk.W,
+                 ).grid(row=2,
+                        column=1,
+                        sticky=tk.W+tk.E,
+                        padx=5,
+                        )
+        tk.Label(self,
+                 text='CRC32:',
+                 ).grid(row=2,
+                        column=2,
                         sticky=tk.W,
                         )
         tk.Label(self,
                  textvariable=self.rom_crc32,
                  anchor=tk.W,
                  ).grid(row=2,
-                        column=1,
+                        column=3,
                         sticky=tk.W+tk.E,
                         padx=5,
                         )
@@ -78,6 +95,7 @@ class RomFrame(tk.Frame):
 ##        lb_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 ##        self.entry_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         tk.Grid.columnconfigure(self, 1, weight=1)
+        tk.Grid.columnconfigure(self, 3, weight=1)
 ##        tk.Grid.rowconfigure(self, 1, weight=1)
         # Force this code to happen.
         self.rom_changed()
@@ -97,18 +115,17 @@ class RomFrame(tk.Frame):
             rom_file = self.settings.rom_file.get()
             with Rom(rom_file) as rom:
                 self.rom_name.set(rom.rom_name)
-                rom_name_label['background'] = ''
-                rom_name_label['foreground'] = ''
+                print rom_name_label.__dict__
+                rom_name_label['background'] = self['background']
                 self.rom_crc32.set(rom.crc32)
+                self.entry_count.set(rom.get_entry_count())
                 self.is_valid_rom.set(True)
-##                print rom.get_entry_count()
 ##                self.entry_listbox.delete(0, tk.END)
 ##                for entry in rom.get_entry_list():
 ##                    self.entry_listbox.insert(tk.END, '0x{:x} - {} - {}'.format(entry[0], entry[1], entry[2]))
         except RomInfoNotFoundError as e:
             self.rom_name.set('Could not find ROM information.')
             rom_name_label['background'] = 'red'
-            rom_name_label['foreground'] = 'white'
             self.rom_crc32.set(e.crc32)
+            self.entry_count.set(0)
             self.is_valid_rom.set(False)
-##            tkMessageBox.showerror("Error", "Error loading ROM information.")
