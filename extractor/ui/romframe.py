@@ -13,7 +13,7 @@ class RomFrame(tk.Frame):
         self.rom_name = tk.StringVar()
         self.rom_crc32 = tk.StringVar()
         self.entry_count = tk.IntVar()
-        self.is_valid_rom = tk.BooleanVar(False)
+        self.is_rom_valid = tk.BooleanVar(False)
         # Add widgets.
         # Row 0
         tk.Label(self,
@@ -106,8 +106,9 @@ class RomFrame(tk.Frame):
             title='Select ROM',
             filetypes =(('ROM files', '*.sfc;*.smc'), ('All files', '*.*')),
             )
-        if rom_file != '':
-            self.settings.rom_file.set(rom_file)
+        if not rom_file:
+            return
+        self.settings.rom_file.set(rom_file)
 
     def rom_changed(self, *args):
         rom_name_label = self.children['rom_name_label']
@@ -115,11 +116,10 @@ class RomFrame(tk.Frame):
             rom_file = self.settings.rom_file.get()
             with Rom(rom_file) as rom:
                 self.rom_name.set(rom.rom_name)
-                print rom_name_label.__dict__
                 rom_name_label['background'] = self['background']
                 self.rom_crc32.set(rom.crc32)
                 self.entry_count.set(rom.get_entry_count())
-                self.is_valid_rom.set(True)
+                self.is_rom_valid.set(True)
 ##                self.entry_listbox.delete(0, tk.END)
 ##                for entry in rom.get_entry_list():
 ##                    self.entry_listbox.insert(tk.END, '0x{:x} - {} - {}'.format(entry[0], entry[1], entry[2]))
@@ -128,4 +128,4 @@ class RomFrame(tk.Frame):
             rom_name_label['background'] = 'red'
             self.rom_crc32.set(e.crc32)
             self.entry_count.set(0)
-            self.is_valid_rom.set(False)
+            self.is_rom_valid.set(False)
