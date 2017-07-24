@@ -5,7 +5,9 @@ from tkFileDialog import askdirectory
 from romframe import RomFrame
 from optionsframe import OptionsFrame
 from settings import Settings
+from statustext import StatusText
 from extractor.rom import Rom
+from extractor.entrytype import *
 
 class MainApplication(tk.Tk):
     def __init__(self, screenName=None, baseName=None, className='Tk', useTk=1):
@@ -21,7 +23,6 @@ class MainApplication(tk.Tk):
                  name='rom_frame',
                  ).pack(anchor=tk.NW,
                         fill=tk.X,
-                        expand=1,
                         **pad
                         )
         self.children['rom_frame'].is_rom_valid.trace("w", self.on_rom_valid_changed)
@@ -31,6 +32,17 @@ class MainApplication(tk.Tk):
                             fill=tk.X,
                             **pad
                             )
+##        self.status = StatusText(self,
+####                              state=tk.DISABLED,
+##                              )
+##        self.status.pack(anchor=tk.NW,
+##                         fill=tk.BOTH,
+##                         expand=1,
+##                         **pad
+##                         )
+##        for x in range(10):
+##            self.status.appendline('test {}'.format(x))
+##        self.status.config(state=tk.DISABLED)
         tk.Button(self,
                   text='Export',
                   name='export_button',
@@ -71,8 +83,19 @@ class MainApplication(tk.Tk):
                 return
             print 'Confirmed.'
         print 'Exporting to: ' + folder
-        self.settings.output_folder.set(folder)
         self.config(cursor='wait')
+        self.settings.output_folder.set(folder)
+        export_classes = self.settings.get_export_class_list()
         with Rom(self.settings.rom_file.get()) as rom:
-            pass
+            # Save maps in a single file.
+            if Map in export_classes:
+                gamemaps = [rom.get_entry(m).generate_dos_map() for m in rom.get_entries_of_class(Map)]
+                Map.save_as_wdc_map_file(folder + "/snes.map", gamemaps)
+            for index in range(rom.get_entry_count()):
+                if rom.get_entry_type(index) is Map:
+                    continue
+                if rom.get_entry_type(index) in export_classes:
+                    entry = rom.get_entry(index)
+                    print '0x{:x} - {}'.format(entry.offset, entry.name)
+                    entry.save(folder)
         self.config(cursor='')
