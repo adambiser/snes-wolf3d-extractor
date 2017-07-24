@@ -199,7 +199,7 @@ class Map(AbstractEntry):
 
         This assumes that the given maps are in the DOS map format.
         """
-        print "Saving %d maps to %s" % (len(maps), filename)
+##        print "Saving %d maps to %s" % (len(maps), filename)
         with open(filename, 'wb') as f:
             f.write('WDC3.1')
             utils.write_int(f, len(maps))
