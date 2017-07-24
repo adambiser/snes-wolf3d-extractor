@@ -49,6 +49,11 @@ class Settings():
         cls.sort()
         return cls
 
+    def get_export_class_list(self):
+        cls = [globals()[key] for key,value in self.export.items() if value.get() == 1]
+        cls.sort()
+        return cls
+
 # For testing.
 if __name__ == "__main__":
     def callback(*args):
