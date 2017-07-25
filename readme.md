@@ -11,20 +11,6 @@ Supported games:
 * Super 3D Noah's Ark (1994)
 * Super 3D Noah's Ark (2013/Steam)
 
-Items that are currently exported:
-* Walls
-* Sprites
-* Palettes
-* Texture used for the sphere when the official Wolf3D release starts
-* Title background, briefing background, status bar, and intermission screen pictures
-* Weapon overlay pictures
-* Maps
-* Sounds
-* Music
-
-Items not yet exported:
-* Text
-
 ## Getting Started
 
 ### Prerequisites
