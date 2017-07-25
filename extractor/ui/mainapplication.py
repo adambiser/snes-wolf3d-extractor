@@ -55,6 +55,7 @@ class MainApplication(tk.Tk):
                          **pad
                          )
         tk.Button(self.button_frame,
+                  text='Open Current Export Folder',
                   command=self.open_export_folder,
                   ).grid(row=0,
                          column=1,
