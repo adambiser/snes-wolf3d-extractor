@@ -103,7 +103,7 @@ class MainApplication(tk.Tk):
             self.add_status('Exporting to: ' + export_folder)
             if os.listdir(export_folder):
                 self.add_status('Export folder not empty.')
-                if not tkMessageBox.askyesno('Confirmation', 'The folder does not appear to be empty. Continue?'):
+                if not tkMessageBox.askyesno('Confirmation', 'The folder does not appear to be empty.\nExisting files may be overwritten.\nContinue?'):
                     self.add_status('Aborted.')
                     return
                 self.add_status('Confirmed.')
