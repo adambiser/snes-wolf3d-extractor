@@ -18,10 +18,10 @@ def init(rom, **kwargs):
     rom.add_entry(InstrumentList(instrument_info_offset, 'instruments'))
     rom.add_entry(Palette(starting_offset, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
-    rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
+    rom.add_entry(ByteData(-1, 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
     rom.add_entry(Palette(-1, 'briefing'))
-    rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
+    rom.add_entry(ByteData(-1, 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'mission_briefing', Image.PLANAR_8BIT, 32, 24, "briefing"))
     rom.add_entry(Palette(-1, 'intermission'))
     rom.add_entry(Image(-1, 'intermission_background', Image.PLANAR_4BIT, 8, 8, "intermission", 0x50))
@@ -49,7 +49,7 @@ def init(rom, **kwargs):
     rom.add_entry(Image(-1, 'overhead_map_tiles_1', Image.PLANAR_8BIT, 8, 5, "main"))
     rom.add_entry(Image(-1, 'overhead_map_tiles_2', Image.PLANAR_8BIT, 7, 1, "main"))
     rom.add_entry(Palette(-1, 'main'))
-    rom.add_entry(ByteData(-1, 'unknown', 0x2300)) # Unknown data that's 0x2300 bytes long.
+    rom.add_entry(ByteData(-1, 0x2300)) # Unknown data that's 0x2300 bytes long.
     rom.add_entry(Image(-1, 'status_bar_left_text', Image.PLANAR_4BIT, 14, 1, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_percent', Image.PLANAR_4BIT, 1, 2, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_right_text', Image.PLANAR_4BIT, 11, 1, "main", 0xf0, 0xf0))
