@@ -9,6 +9,7 @@ from statustext import StatusText
 from extractor.rom import Rom
 from extractor.entrytype import *
 import extractor.utils as utils
+import utils as ui_utils
 
 class MainApplication(tk.Tk):
     def __init__(self, screenName=None, baseName=None, className='Tk', useTk=1):
@@ -63,7 +64,7 @@ class MainApplication(tk.Tk):
                          **pad
                          )
         self.minsize(600, 500)
-        self.center_window(600, 500)
+        ui_utils.center_window(self, 600, 500)
         # Force this code to run.
         self.on_rom_valid_changed()
 
@@ -74,11 +75,6 @@ class MainApplication(tk.Tk):
     def on_closing(self):
         self.settings.save()
         self.destroy()
-
-    def center_window(self, width, height):
-        x = (self.winfo_screenwidth() - width) / 2
-        y = (self.winfo_screenheight() - height) / 2
-        self.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
     def add_status(self, text):
         self.status.appendline(text)

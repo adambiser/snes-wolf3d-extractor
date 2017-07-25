@@ -1,5 +1,6 @@
 from extractor.rom import Rom
 from extractor.exceptions import RomInfoNotFoundError
+from entrylisttoplevel import EntryListTopLevel
 import os
 import Tkinter as tk
 from tkFileDialog import askopenfilename
@@ -41,7 +42,7 @@ class RomFrame(tk.Frame):
                   command=self.select_rom,
                   ).grid(row=0,
                          column=4,
-                         sticky=tk.E,
+                         sticky=tk.W+tk.E,
                          )
         # Row 1
         tk.Label(self,
@@ -62,13 +63,13 @@ class RomFrame(tk.Frame):
                         )
         # Row 2
         tk.Label(self,
-                 text='Entries:',
+                 text='CRC32:',
                  ).grid(row=2,
                         column=0,
                         sticky=tk.W,
                         )
         tk.Label(self,
-                 textvariable=self.entry_count,
+                 textvariable=self.rom_crc32,
                  anchor=tk.W,
                  ).grid(row=2,
                         column=1,
@@ -76,19 +77,28 @@ class RomFrame(tk.Frame):
                         padx=5,
                         )
         tk.Label(self,
-                 text='CRC32:',
+                 text='Entries:',
                  ).grid(row=2,
                         column=2,
                         sticky=tk.W,
                         )
         tk.Label(self,
-                 textvariable=self.rom_crc32,
+                 textvariable=self.entry_count,
                  anchor=tk.W,
                  ).grid(row=2,
                         column=3,
                         sticky=tk.W+tk.E,
                         padx=5,
                         )
+        tk.Button(self,
+                  name='view_entry_list_button',
+                  text='View',
+                  state=tk.DISABLED,
+                  command=self.show_entry_list,
+                  ).grid(row=2,
+                         column=4,
+                         sticky=tk.W+tk.E,
+                         )
         # Row 3
         tk.Label(self,
                  text='Info:',
@@ -132,6 +142,9 @@ class RomFrame(tk.Frame):
             return
         self.settings.rom_file.set(rom_file)
 
+    def show_entry_list(self):
+        view = EntryListTopLevel(self, self.settings.rom_file.get())
+
     def rom_changed(self, *args):
         rom_name_label = self.children['rom_name_label']
         rom_file = self.settings.rom_file.get()
@@ -144,13 +157,12 @@ class RomFrame(tk.Frame):
                 rom_name_label['background'] = self['background']
                 self.rom_crc32.set(rom.crc32)
                 self.entry_count.set(rom.get_entry_count())
+                self.children['view_entry_list_button'].config(state=tk.NORMAL)
                 self.is_rom_valid.set(True)
-##                self.entry_listbox.delete(0, tk.END)
-##                for entry in rom.get_entry_list():
-##                    self.entry_listbox.insert(tk.END, '0x{:x} - {} - {}'.format(entry[0], entry[1], entry[2]))
         except RomInfoNotFoundError as e:
             self.rom_name.set('Could not find ROM information.')
             rom_name_label['background'] = 'red'
             self.rom_crc32.set(e.crc32)
             self.entry_count.set(0)
+            self.children['view_entry_list_button'].config(state=tk.DISABLED)
             self.is_rom_valid.set(False)
