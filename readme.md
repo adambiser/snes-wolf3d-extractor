@@ -33,7 +33,7 @@ You will need Python 2.7 installed on your system.
 
 ### Installing
 
-Download the code and run.
+Download the code and run extractor.py.
 
 ## License
 
