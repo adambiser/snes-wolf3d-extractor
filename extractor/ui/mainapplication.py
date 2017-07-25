@@ -48,8 +48,8 @@ class MainApplication(tk.Tk):
                          fill=tk.X,
                          **pad
                          )
-        self.minsize(500, 400)
-        self.center_window(500, 400)
+        self.minsize(600, 500)
+        self.center_window(600, 500)
         # Force this code to run.
         self.on_rom_valid_changed()
 
