@@ -62,3 +62,4 @@ from palette import Palette
 from song import Song
 from sound import Sound
 from sprite import Sprite
+from text import Text
