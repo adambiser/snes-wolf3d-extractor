@@ -10,15 +10,13 @@ Example from S3DNA:
     [-1, 'overhead_map_tiles_2', Image, Image.PLANAR_8BIT, 7, 1, "main"],
 '''
 
-_rom_name = None
-_instrument_info_offset = 0x130
-_starting_offset = 0x76168
 
 def init(rom):
-    rom.rom_name = _rom_name
+    instrument_info_offset = 0x130
+    starting_offset = 0x76168
     # If offset is -1, it is assumed to immediately follow the previous entry.
-    rom.add_entry(InstrumentList(_instrument_info_offset, 'instruments'))
-    rom.add_entry(Palette(_starting_offset, 'title'))
+    rom.add_entry(InstrumentList(instrument_info_offset, 'instruments'))
+    rom.add_entry(Palette(starting_offset, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
     rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))

@@ -3,34 +3,33 @@ from ..utils import insert_string
 import struct
 
 # These must be modified by rom info files using this one as their base.
-_rom_name = None
-_starting_offset = None
-_has_ball_texture = None
-_map_offset_list_offset = None
-_map_name_offset = None
-_sprite_info_offset = None
-_sound_info_offset_1 = None
-_sound_info_offset_2 = None
-_sound_group_2_count = None
-_instrument_info_offset = None
-_song_offset_list_offset = None
-_is_japan = None
 
-def init(rom):
-    rom.rom_name = _rom_name
+def init(rom, **kwargs):
+    # Using USA rom values as default.
+    starting_offset = kwargs.get('starting_offset', 0x82ab3)
+    has_ball_texture = kwargs.get('has_ball_texture', True)
+    map_offset_list_offset = kwargs.get('map_offset_list_offset', 0xfc886)
+    map_name_offset = kwargs.get('map_name_offset', 0x3958)
+    sprite_info_offset = kwargs.get('sprite_info_offset', 0xfda6e)
+    sound_info_offset_1 = kwargs.get('sound_info_offset_1', 0xe981e)
+    sound_info_offset_2 = kwargs.get('sound_info_offset_2', 0xfc6b8)
+    sound_group_2_count = kwargs.get('sound_group_2_count', 5)
+    instrument_info_offset = kwargs.get('instrument_info_offset', 0x8b)
+    song_offset_list_offset = kwargs.get('song_offset_list_offset', 0xfd7a1)
+    is_japan = kwargs.get('is_japan', False)
     # If offset is -1, it is assumed to immediately follow the previous entry.
-    rom.add_entry(InstrumentList(_instrument_info_offset, 'instruments'))
-    if _has_ball_texture:
-        rom.add_entry(Image(_starting_offset, 'ball_texture', Image.LINEAR_8BIT_RMO, 64, 64, "main"))
+    rom.add_entry(InstrumentList(instrument_info_offset, 'instruments'))
+    if has_ball_texture:
+        rom.add_entry(Image(starting_offset, 'ball_texture', Image.LINEAR_8BIT_RMO, 64, 64, "main"))
         rom.add_entry(ByteData(-1, 'unknown', 1)) # There is 1 more byte, padding?
         rom.add_entry(Palette(-1, 'title'))
     else:
-        rom.add_entry(Palette(_starting_offset, 'title'))
+        rom.add_entry(Palette(starting_offset, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
     rom.add_entry(ByteData(-1, 'unknown', 64)) # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
     rom.add_entry(Palette(-1, 'briefing'))
-    if _is_japan:
+    if is_japan:
         rom.add_entry(Image(-1, 'mission_intro_1', Image.PLANAR_8BIT, 30, 4, "briefing"))
         rom.add_entry(Image(-1, 'mission_intro_2', Image.PLANAR_8BIT, 20, 4, "briefing"))
         rom.add_entry(Image(-1, 'mission_intro_3', Image.PLANAR_8BIT, 30, 4, "briefing"))
@@ -90,9 +89,9 @@ def init(rom):
     # Map offsets are stored as: 00 01 35 03 CC
     # final CC needs to be converted to be 0C
     # 00 01 appears to mark index entries.
-    map_offsets = read_rom_address_list(rom, _map_offset_list_offset, 30)
+    map_offsets = read_rom_address_list(rom, map_offset_list_offset, 30)
     for x in range(len(map_offsets)):
-        entry_name = rom.read_text_chunk(_map_name_offset + x * 3, 2)
+        entry_name = rom.read_text_chunk(map_name_offset + x * 3, 2)
         entry_name = 'Map ' + insert_string(entry_name, 1, '-')
         rom.add_entry(Map(map_offsets[x], entry_name))
     # Add walls
@@ -105,7 +104,7 @@ def init(rom):
                   )
             )
     # Add sprites
-    sprite_info = read_sprite_info(rom, _sprite_info_offset, 0x30000)
+    sprite_info = read_sprite_info(rom, sprite_info_offset, 0x30000)
     for x in range(len(sprite_info)):
         entry_name = 'sprite_{:03d}'.format(x)
         rom.add_entry(
@@ -115,7 +114,7 @@ def init(rom):
                    )
             )
     # Sounds
-    sound_info = Sound.read_sound_info(rom, _sound_info_offset_1, _sound_info_offset_2, _sound_group_2_count)
+    sound_info = Sound.read_sound_info(rom, sound_info_offset_1, sound_info_offset_2, sound_group_2_count)
     for x in range(len(sound_info)):
         entry_name = 'sound_{:02d}'.format(x)
         rom.add_entry(
@@ -125,7 +124,7 @@ def init(rom):
                    )
             )
     # Songs
-    song_offsets = read_rom_address_list(rom, _song_offset_list_offset, 12)
+    song_offsets = read_rom_address_list(rom, song_offset_list_offset, 12)
     for x in range(len(song_offsets)):
         entry_name = 'song_{:02d}'.format(x)
         rom.add_entry(Song(song_offsets[x], entry_name))
