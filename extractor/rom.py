@@ -17,7 +17,8 @@ First Map:
 class Rom:
     def __init__(self, filename):
         """The crc32 of the given file is used to determine which rom information to use."""
-        # Detect what rom was given.
+        self.name = ''
+        self.info = ''
         self.filename = filename
         self.crc32 = format(self.get_crc32(), '8x')
         self.entries = []
