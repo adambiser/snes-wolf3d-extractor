@@ -1,5 +1,6 @@
 from extractor.rom import Rom
 from extractor.exceptions import RomInfoNotFoundError
+import os
 import Tkinter as tk
 from tkFileDialog import askopenfilename
 import tkMessageBox
@@ -11,6 +12,7 @@ class RomFrame(tk.Frame):
         self.settings = settings
         self.settings.rom_file.trace("w", self.rom_changed)
         self.rom_name = tk.StringVar()
+        self.rom_info = tk.StringVar()
         self.rom_crc32 = tk.StringVar()
         self.entry_count = tk.IntVar()
         self.is_rom_valid = tk.BooleanVar(False)
@@ -87,6 +89,22 @@ class RomFrame(tk.Frame):
                         sticky=tk.W+tk.E,
                         padx=5,
                         )
+        # Row 3
+        tk.Label(self,
+                 text='Info:',
+                 ).grid(row=3,
+                        column=0,
+                        sticky=tk.W,
+                        )
+        tk.Label(self,
+                 textvariable=self.rom_info,
+                 anchor=tk.W,
+                 ).grid(row=3,
+                        column=1,
+                        columnspan=4,
+                        sticky=tk.W+tk.E,
+                        padx=(5, 0),
+                        )
 ##        lb_frame = tk.Frame(self)
 ##        lb_scrollbar = tk.Scrollbar(lb_frame, orient=tk.VERTICAL)
 ##        self.entry_listbox = tk.Listbox(lb_frame, yscrollcommand=lb_scrollbar.set)
@@ -103,8 +121,10 @@ class RomFrame(tk.Frame):
         self.rom_changed()
 
     def select_rom(self):
+        initialdir, initialfile = os.path.split(self.settings.rom_file.get())
         rom_file = askopenfilename(
-            initialdir=self.settings.rom_file,
+            initialdir=initialdir,
+            initialfile=initialfile,
             title='Select ROM',
             filetypes =(('ROM files', '*.sfc;*.smc'), ('All files', '*.*')),
             )
@@ -114,10 +134,13 @@ class RomFrame(tk.Frame):
 
     def rom_changed(self, *args):
         rom_name_label = self.children['rom_name_label']
+        rom_file = self.settings.rom_file.get()
+        if not rom_file:
+            return
         try:
-            rom_file = self.settings.rom_file.get()
             with Rom(rom_file) as rom:
                 self.rom_name.set(rom.name)
+                self.rom_info.set(rom.info)
                 rom_name_label['background'] = self['background']
                 self.rom_crc32.set(rom.crc32)
                 self.entry_count.set(rom.get_entry_count())
