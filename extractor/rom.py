@@ -81,6 +81,10 @@ class Rom:
             entry.offset = self.entries[-1].offset + self.entries[-1]._get_length()
         self.entries.append(entry)
 
+    def add_entry_list(self, entries):
+        for entry in entries:
+            self.add_entry(entry)
+
     def get_entry_list(self):
         return sorted((entry.offset, entry.__class__.__name__, entry.name) for entry in self.entries)
 
