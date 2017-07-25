@@ -36,16 +36,29 @@ class MainApplication(tk.Tk):
         self.status = StatusText(self)
         self.status.pack(anchor=tk.NW,
                          fill=tk.BOTH,
-                         expand=1,
+                         expand=True,
                          **pad
                          )
-        tk.Button(self,
+        self.button_frame = tk.Frame(self)
+        self.button_frame.pack(side=tk.BOTTOM,
+                               fill=tk.X,
+                               )
+        self.button_frame.grid_columnconfigure(0, weight=1, uniform='x')
+        self.button_frame.grid_columnconfigure(1, weight=1, uniform='x')
+        tk.Button(self.button_frame,
                   text='Export',
                   name='export_button',
                   command=self.export,
-                  ).pack(anchor=tk.NW,
-                         side=tk.BOTTOM,
-                         fill=tk.X,
+                  ).grid(row=0,
+                         column=0,
+                         sticky=tk.W+tk.E,
+                         **pad
+                         )
+        tk.Button(self.button_frame,
+                  command=self.open_export_folder,
+                  ).grid(row=0,
+                         column=1,
+                         sticky=tk.W+tk.E,
                          **pad
                          )
         self.minsize(600, 500)
@@ -55,7 +68,7 @@ class MainApplication(tk.Tk):
 
     def on_rom_valid_changed(self, *args):
         enabled = self.children['rom_frame'].is_rom_valid.get()
-        self.children['export_button'].config(state = tk.NORMAL if enabled else tk.DISABLED)
+        self.button_frame.children['export_button'].config(state = tk.NORMAL if enabled else tk.DISABLED)
 
     def on_closing(self):
         self.settings.save()
@@ -69,6 +82,9 @@ class MainApplication(tk.Tk):
     def add_status(self, text):
         self.status.appendline(text)
         self.update()
+
+    def open_export_folder(self):
+        os.startfile(self.settings.export_folder.get())
 
     def export(self):
         folder = askdirectory(title='Choose output directory.\nThe files will appear in a subfolder.',
