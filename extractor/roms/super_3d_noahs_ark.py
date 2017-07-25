@@ -11,9 +11,9 @@ Example from S3DNA:
 '''
 
 
-def init(rom):
-    instrument_info_offset = 0x130
-    starting_offset = 0x76168
+def init(rom, **kwargs):
+    instrument_info_offset = kwargs.get('instrument_info_offset', 0x130)
+    starting_offset = kwargs.get('starting_offset', 0x76168)
     # If offset is -1, it is assumed to immediately follow the previous entry.
     rom.add_entry(InstrumentList(instrument_info_offset, 'instruments'))
     rom.add_entry(Palette(starting_offset, 'title'))
