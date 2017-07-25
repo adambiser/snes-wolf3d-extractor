@@ -1,26 +1,6 @@
 from extractor.exceptions import RomInfoNotFoundError
 from extractor.entrytype import *
 
-"""
-NOTE: Short text and error messages are not included.
-Examples from Wolf3D USA:
-    3301    0x0a    password_entry
-    39EF    0x10    invalid_password
-    42FA    0x16    demo_recording
-    50F4    0x0a    password_2
-    74E9    0x62    not_designed_for_your_snes
-            0x2d    walk_bad_dir
-    84A0    0x15    move_actoron_bad_dir
-    95B7    0x10    static_overload
-    9DA7    0x4a    bad_spawn_type
-            0x10    bad_changeweapon
-            0x8     bad_fire
-    C0CE    0x13    pwall_seg
-    DC90    0x13    bad_secret_elevator
-    FFC0    0x16    wolfenstein_3d
-    FF7E6   0x10b   error_messages  has_length_byte=True
-"""
-
 ############################################
 # Super 3D Noah's Ark
 ############################################
@@ -28,6 +8,17 @@ def rom_a2315a14(rom):
     from . import super_3d_noahs_ark as base
     rom.name = "Super 3D Noah's Ark (1994)"
     base.init(rom)
+    rom.add_entry_list([
+        Text(0xFCBEC, 0x170, 'story_1'),
+        Text(0xFCDAB, 0x18f, 'story_2'),
+        Text(0xFCF7D, 0x131, 'story_3'),
+        Text(0xFD0ED, 0x126, 'story_4'),
+        Text(0xFD24A, 0xd7, 'story_5'),
+        Text(0xFD358, 0x106, 'story_6'),
+        Text(0xFD50B, 0x7d, 'cast_list'),
+        Text(0xFD5A1, 0x34, 'meet_the_cast'),
+        Text(0xFD6ED, 0x188, 'credits'),
+        ])
 
 def rom_643d5097(rom):
     rom_a2315a14(rom)
@@ -68,14 +59,8 @@ def rom_6a455ee2(rom):
               instrument_info_offset = 0x9c,
               )
     rom.add_entry_list([
-##        Text(0x395C, 0x66, 'level_select_screen'),
-##        Text(0x3CE1, 0x42, 'password_screen'),
-##        Text(0x3F6E, 0x6a, 'main_menu'),
         Text(0x55A1, 0x15, 'meet_the_cast'),
         Text(0x5793, 0x1e4, 'credits'),
-##        Text(0x65CE, 0xc9, 'sound_test'),
-##        Text(0x6813, 0x57, 'music_test'),
-##        Text(0x6B8C, 0x6f, 'instrument_test'),
         Text(0x73B0, 0x77, 'copyright'),
         Text(0xFCCAF, 0x934, 'mission_briefing', '\x00\x01\\x2a|\x00\x01|\x00\x02'),
         Text(0xFD69F, 0x8d, 'cast_list', '\x00\x01'),
@@ -88,6 +73,13 @@ def rom_cc47b8f9(rom):
               sound_info_offset_1 = 0xe66de,
               is_japan = True,
               )
+    rom.add_entry_list([
+        Text(0x55CA, 0x15, 'meet_the_cast'),
+        Text(0x57BC, 0x1e4, 'credits'),
+        Text(0x73BF, 0x5d, 'copyright'),
+        Text(0xFCCAF, 0x934, 'mission_briefing', '\x00\x01\\x2a|\x00\x01|\x00\x02'),
+        Text(0xFD69F, 0x8d, 'cast_list', '\x00\x01'),
+        ])
     
 def rom_63e442b4(rom):
     from . import wolfenstein_3d as base
@@ -103,6 +95,13 @@ def rom_63e442b4(rom):
               instrument_info_offset = 0xd,
               song_offset_list_offset = 0xFC77A,
               )
+    rom.add_entry_list([
+        Text(0x4A94, 0x5e, 'rank'),
+        Text(0x4D4F, 0x1a, 'meet_the_cast'),
+        Text(0x4F01, 0x1bd, 'credits'),
+        Text(0xFBCAD, 0x923, 'mission_briefing', '\x00\x01\\x2a|\x00\x01|\x00\x02'),
+        Text(0xFC68F, 0x6e, 'cast_list', '\x00\x01'),
+        ])
 
 def rom_2bebdb00(rom):
     from . import wolfenstein_3d as base
@@ -116,6 +115,13 @@ def rom_2bebdb00(rom):
               sound_info_offset_2 = 0xfbeb8,
               song_offset_list_offset = 0xFCF87,
               )
+    rom.add_entry_list([
+        Text(0x5473, 0x1a, 'meet_the_cast'),
+        Text(0x5660, 0x1e4, 'credits'),
+        Text(0x721C, 0x14, 'licensed'),
+        Text(0xFC4AC, 0x932, 'mission_briefing', '\x00\x01\\x2a|\x00\x01|\x00\x02'),
+        Text(0xFCE97, 0x7b, 'cast_list', '\x00\x01'),
+        ])
 
 ############################################
 # Main init function.
