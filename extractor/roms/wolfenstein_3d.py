@@ -128,33 +128,6 @@ def init(rom, **kwargs):
     for x in range(len(song_offsets)):
         entry_name = 'song_{:02d}'.format(x)
         rom.add_entry(Song(song_offsets[x], entry_name))
-    # Text
-##    text_entries = [
-##        Text(0x3301, 0x0a, 'password_entry'),
-##        Text(0x394B, 0x66, 'level_select_screen'),
-##        Text(0x39EF, 0x10, 'invalid_password'),
-##        Text(0x3CD0, 0x42, 'password_screen'),
-##        Text(0x3F5D, 0x6a, 'main_menu'),
-##        Text(0x42FA, 0x16, 'demo_recording'),
-##        Text(0x50F4, 0x0a, 'password_2'),
-##        Text(0x5590, 0x15, 'meet_the_cast'),
-##        Text(0x5782, 0x1e4, 'credits'),
-##        Text(0x65BC, 0xc9, 'sound_test'),
-##        Text(0x6801, 0x57, 'music_test'),
-##        Text(0x739E, 0x77, 'copyright'),
-##        Text(0x74E9, 0x62, 'not_designed_for_your_snes'),
-##        Text(0x84A0, 0x15, 'bad_dir'),
-##        Text(0x95B7, 0x10, 'static_overload'),
-##        Text(0x9DA7, 0x4a, 'bad_spawn_type'),
-##        Text(0xC0CE, 0x13, 'pwall_seg'),
-##        Text(0xDC90, 0x13, 'bad_secret_elevator'),
-##        Text(0xFFC0, 0x16, 'wolfenstein_3d'),
-##        Text(0xFCCAF, 0x934, 'mission_briefing', '\x00\x01\\x2a|\x00\x01|\x00\x02'),
-##        Text(0xFD69F, 0x8d, 'cast_list', '\x00\x01'),
-##        Text(0xFF7E6, 0x10b, 'error_messages', has_length_byte=True),
-##        ]
-##    for entry in text_entries:
-##        rom.add_entry(entry)
 
 def read_rom_address_list(rom, offset, count):
     """Reads a list of addresses in Wolf3D's weird storage method.
