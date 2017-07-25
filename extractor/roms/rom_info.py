@@ -67,7 +67,6 @@ def rom_2bebdb00(rom):
     rom.name = "Wolfenstein 3D (Beta 2)"
     base.init(rom,
               starting_offset = 0x82b7b,
-              has_ball_texture = True,
               map_offset_list_offset = 0xfc086,
               map_name_offset = 0x3935,
               sprite_info_offset = 0xfd254,
