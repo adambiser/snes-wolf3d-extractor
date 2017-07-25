@@ -39,4 +39,4 @@ class OptionsFrame(tk.LabelFrame):
                 row += 1
                 col = 0
         for col in range(OptionsFrame.COLUMNS):
-            tk.Grid.columnconfigure(subframe, col, weight=1)
+            tk.Grid.columnconfigure(subframe, col, weight=1, uniform='a')

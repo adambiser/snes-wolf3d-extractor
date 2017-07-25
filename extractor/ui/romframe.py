@@ -94,8 +94,10 @@ class RomFrame(tk.Frame):
 ##        lb_frame.grid(row=1, column=0, columnspan=3, sticky=tk.W+tk.E+tk.N+tk.S, pady=5)
 ##        lb_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 ##        self.entry_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-        tk.Grid.columnconfigure(self, 1, weight=1)
-        tk.Grid.columnconfigure(self, 3, weight=1)
+        tk.Grid.columnconfigure(self, 0, uniform='a')
+        tk.Grid.columnconfigure(self, 2, uniform='a')
+        tk.Grid.columnconfigure(self, 1, weight=1, uniform='b')
+        tk.Grid.columnconfigure(self, 3, weight=1, uniform='b')
 ##        tk.Grid.rowconfigure(self, 1, weight=1)
         # Force this code to happen.
         self.rom_changed()
