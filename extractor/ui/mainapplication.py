@@ -98,7 +98,7 @@ class MainApplication(tk.Tk):
         with Rom(self.settings.rom_file.get()) as rom:
             export_folder = folder
             if self.settings.export_to_subfolder.get():
-                export_folder = os.path.join(export_folder, rom.rom_name)
+                export_folder = os.path.join(export_folder, rom.name)
                 utils.create_path(export_folder)
             self.add_status('Exporting to: ' + export_folder)
             if os.listdir(export_folder):

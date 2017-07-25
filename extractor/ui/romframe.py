@@ -117,7 +117,7 @@ class RomFrame(tk.Frame):
         try:
             rom_file = self.settings.rom_file.get()
             with Rom(rom_file) as rom:
-                self.rom_name.set(rom.rom_name)
+                self.rom_name.set(rom.name)
                 rom_name_label['background'] = self['background']
                 self.rom_crc32.set(rom.crc32)
                 self.entry_count.set(rom.get_entry_count())

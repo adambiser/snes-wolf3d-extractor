@@ -21,10 +21,11 @@ class Rom:
         self.filename = filename
         self.crc32 = format(self.get_crc32(), '8x')
         self.entries = []
+        self.offset_delta = 0
         # Load rom information into the rom object.
         with self:
             rom_info.init(self)
-        print 'Detected ROM: "{}" (crc32: {})'.format(self.rom_name, self.crc32)
+        print 'Detected ROM: "{}" (crc32: {})'.format(self.name, self.crc32)
 
     def __enter__(self):
         self.open()
@@ -62,11 +63,13 @@ class Rom:
 
     def seek(self, offset, whence=0):
         """Move to a new position within the rom."""
+        if whence==0:
+            offset += self.offset_delta
         self.f.seek(offset, whence)
 
     def tell(self):
         """Returns the current position within the rom."""
-        return self.f.tell()
+        return self.f.tell() - self.offset_delta
 
     def add_entry(self, entry):
         """Adds an entry to the entry list.
