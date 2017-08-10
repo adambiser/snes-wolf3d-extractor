@@ -28,21 +28,26 @@ class Map(AbstractEntry):
 
     def load(self, rom):
         rom.seek(self.offset)
+        self.readcompressedmap(rom)
+        object_count = utils.read_ushort(rom)
+        rom.seek(0x6, 1)
+        self.readobjects(rom, object_count)
+
+    def readcompressedmap(self, rom):
         # Assuming this is an uncompressed size, but since this code doesn't do
         # anything with the data after the object list, ignore.
-        uncompressed_size = rom.read_ushort()
-        # This format has 64 extra bytes after the wall data that are compressed the same way.
+        uncompressed_size = utils.read_ushort(rom)
         self._walls = [0 for x in range(Map._MAP_SIZE * Map._MAP_SIZE + 64)]
         # Read and decompress the wall data.
-        tag = rom.read_ubyte()
+        tag = utils.read_ubyte(rom)
         # Number of bits for the value of 'count' down below.
-        match_bits = rom.read_ubyte()
+        match_bits = utils.read_ubyte(rom)
         assert match_bits == 4
         index = 0
         while index < len(self._walls):
-            b = rom.read_ubyte()
+            b = utils.read_ubyte(rom)
             if b == tag:
-                b = rom.read_ushort()
+                b = utils.read_ushort(rom)
                 count = (b & 0xf) + 3
                 offset = (b & 0xfff0) >> 4
                 for x in range(0, count):
@@ -51,19 +56,19 @@ class Map(AbstractEntry):
             else:
                 self._walls[index] = b
                 index += 1
-        # Split the extra 64 bytes into a new list and remove them from the wall bytes.
-        self._extra_bytes = self._walls[-64:]
+        # Split the floorcode into a new list and remove them from the wall bytes.
+        self._floorcodes = self._walls[-64:]
         self._walls = self._walls[:-64]
+
+    def readobjects(self, rom, object_count):
         # Read the object list.
-        object_count = rom.read_ushort()
-        rom.seek(0x6, 1)
         self._objects = []
         for o in range(object_count):
             x = rom.read(1)
             if x == '':
                 break
             x = struct.unpack('<B', x)[0]
-            y = rom.read_ubyte()
+            y = utils.read_ubyte(rom)
 ##            assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
 ##            assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
             if not (0 <= x <= Map._MAP_SIZE and 0 <= y <= Map._MAP_SIZE):
@@ -73,7 +78,7 @@ class Map(AbstractEntry):
             if x >= Map._MAP_SIZE: x -= Map._MAP_SIZE
             if y < 0: y += Map._MAP_SIZE
             if y >= Map._MAP_SIZE: y -= Map._MAP_SIZE
-            object_code = rom.read_ubyte()
+            object_code = utils.read_ubyte(rom)
             self._objects.append({
                 'x': x,
                 'y': y,
@@ -81,7 +86,7 @@ class Map(AbstractEntry):
                 })
             # Pushwalls have an extra byte indicating its wall tile.
             if object_code == Map._PUSHWALL:
-                self._objects[-1]['wall'] = rom.read_ubyte()
+                self._objects[-1]['wall'] = utils.read_ubyte(rom)
 
     def generate_dos_map(self):
         """Converts the SNES map data to DOS map format.
@@ -97,8 +102,8 @@ class Map(AbstractEntry):
             tiles[0][index] = self._walls[index]
             if tiles[0][index] >= 0x80:
                 tiles[0][index] -= 0x80
-            else:
-                tiles[0][index] += Map._FLOOR_CODE_START
+            elif tiles[0][index] < 64:
+                tiles[0][index] = Map._FLOOR_CODE_START + self._floorcodes[tiles[0][index]]
         # Place objects.
         for obj in self._objects:
             index = obj['x'] + obj['y'] * Map._MAP_SIZE
