@@ -153,14 +153,17 @@ class RomFrame(tk.Frame):
         try:
             with Rom(rom_file) as rom:
                 self.rom_name.set(rom.name)
-                self.rom_info.set(rom.info)
+                self.rom_info.set(rom.info + ((', ' if len(rom.info) > 0 else '') +
+                        'Data offset: 0x{:x}'.format(rom.offset_delta) if rom.offset_delta > 0 else ''))
                 rom_name_label['background'] = self['background']
-                self.rom_crc32.set(rom.crc32)
+                self.rom_crc32.set(rom.datacrc32 + ("File: " + rom.filecrc32 if rom.filecrc32 != rom.filecrc32 else ""))
                 self.entry_count.set(rom.get_entry_count())
                 self.children['view_entry_list_button'].config(state=tk.NORMAL)
                 self.is_rom_valid.set(True)
         except RomInfoNotFoundError as e:
+            print 'Could not detect ROM: {}'.format(e.crc32)
             self.rom_name.set('Could not find ROM information.')
+            self.rom_info.set('')
             rom_name_label['background'] = 'red'
             self.rom_crc32.set(e.crc32)
             self.entry_count.set(0)

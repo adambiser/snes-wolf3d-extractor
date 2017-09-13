@@ -20,13 +20,15 @@ class Rom:
         self.name = ''
         self.info = ''
         self.filename = filename
-        self.crc32 = format(self.get_crc32(), '8x')
-        self.entries = []
         self.offset_delta = 0
+        self.filecrc32 = format(self.get_crc32(False), '8x')
+        self.datacrc32 = format(self.get_crc32(True), '8x')
+        self.entries = []
         # Load rom information into the rom object.
         with self:
             rom_info.init(self)
-        print 'Detected ROM: "{}" (crc32: {})'.format(self.name, self.crc32)
+        print 'Detected ROM: "{}" (data crc32: {}{})'.format(self.name, self.datacrc32,
+                ", file crc32: {}".format(self.filecrc32) if self.filecrc32 != self.datacrc32 else "")
 
     def __enter__(self):
         self.open()
@@ -36,9 +38,14 @@ class Rom:
         self.close()
         return False
 
-    def get_crc32(self):
+    def get_crc32(self, detect_smc=False):
         """Calculates the unsigned crc32 value for the rom."""
         with self:
+            if detect_smc:
+                buf = struct.unpack(">H", self.read(2))[0]
+                if buf == 0x8000:
+                    self.offset_delta = 0x200
+                self.seek(0, 0)
             buf = self.read()
         return (binascii.crc32(buf) & 0xFFFFFFFF)
 
