@@ -1,2 +1,2 @@
-from rom import Rom
+from .rom import Rom
 import utils

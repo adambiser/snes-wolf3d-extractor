@@ -9,7 +9,7 @@ from statustext import StatusText
 from extractor.rom import Rom
 from extractor.entrytype import *
 import extractor.utils as utils
-import ui.utils as ui_utils
+import utils as ui_utils
 
 
 class MainApplication(tk.Tk):
