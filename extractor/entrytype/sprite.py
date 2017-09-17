@@ -35,6 +35,6 @@ class Sprite(Image):
                 pixel_offset = rom.read_ushort()
                 rom.seek(page_offset + pixel_offset + top_y)
                 for y in range(top_y, bottom_y):
-                    pixels[y - 1][pixel_x] = rom.read_ubyte()
+                    pixels[y][pixel_x] = rom.read_ubyte()
             pixel_x += 1
         self._pixels = pixels
