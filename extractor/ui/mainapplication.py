@@ -9,7 +9,8 @@ from statustext import StatusText
 from extractor.rom import Rom
 from extractor.entrytype import *
 import extractor.utils as utils
-import utils as ui_utils
+import ui.utils as ui_utils
+
 
 class MainApplication(tk.Tk):
     def __init__(self, screenName=None, baseName=None, className='Tk', useTk=1):
@@ -19,7 +20,7 @@ class MainApplication(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.settings = Settings()
         # Add widgets
-        pad = {'padx':5, 'pady':5}
+        pad = {'padx': 5, 'pady': 5}
         RomFrame(self,
                  self.settings,
                  name='rom_frame',
@@ -70,14 +71,14 @@ class MainApplication(tk.Tk):
 
     def on_rom_valid_changed(self, *args):
         enabled = self.children['rom_frame'].is_rom_valid.get()
-        self.button_frame.children['export_button'].config(state = tk.NORMAL if enabled else tk.DISABLED)
+        self.button_frame.children['export_button'].config(state=tk.NORMAL if enabled else tk.DISABLED)
 
     def on_closing(self):
         self.settings.save()
         self.destroy()
 
-    def add_status(self, text):
-        self.status.appendline(text)
+    def add_status(self, status_text):
+        self.status.appendline(status_text)
         self.update()
 
     def open_export_folder(self):
@@ -99,7 +100,8 @@ class MainApplication(tk.Tk):
             self.add_status('Exporting to: ' + export_folder)
             if os.listdir(export_folder):
                 self.add_status('Export folder not empty.')
-                if not tkMessageBox.askyesno('Confirmation', 'The folder does not appear to be empty.\nExisting files may be overwritten.\nContinue?'):
+                if not tkMessageBox.askyesno('Confirmation', 'The folder does not appear to be empty.\n'
+                                                             'Existing files may be overwritten.\nContinue?'):
                     self.add_status('Aborted.')
                     return
                 self.add_status('Confirmed.')

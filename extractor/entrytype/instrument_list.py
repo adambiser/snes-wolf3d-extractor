@@ -3,6 +3,7 @@ from .sound import Sound
 import struct
 import textwrap
 
+
 class InstrumentList(AbstractEntry):
     """The list of instruments used by the game to play music.
 
@@ -21,7 +22,7 @@ class InstrumentList(AbstractEntry):
 
     def load(self, rom):
         # Only load once.
-        if not self.instruments is None:
+        if self.instruments is not None:
             return
         rom.seek(self.offset)
         # Load the instrument numbers and info offsets.
@@ -32,10 +33,10 @@ class InstrumentList(AbstractEntry):
             b1 = rom.read_ubyte()
             assert b1 == 0
             b1 = rom.read_ubyte()
-            if b1 == 0xf0: # Relative offset
+            if b1 == 0xf0:  # Relative offset
                 info_offset = rom.read_ubyte() + 1
                 info_offset += rom.tell()
-            elif b1 == 0xd0: # Absolute offset
+            elif b1 == 0xd0:  # Absolute offset
                 # No clue what this is.
                 unknown = rom.read(2)
                 assert unknown == '\x03\x4c'
@@ -59,7 +60,9 @@ class InstrumentList(AbstractEntry):
         return self.instruments[key]
 
     def __str__(self):
-        return '{} instruments:\n\n'.format(len(self.instruments)) + '\n\n'.join([str(self.instruments[i]) for i in sorted(self.instruments)])
+        return '{} instruments:\n\n'.format(len(self.instruments)) + '\n\n'.join([str(self.instruments[i])
+                                                                                  for i in sorted(self.instruments)])
+
 
 class Instrument:
     """An instrument based on a sound from the rom."""
@@ -81,24 +84,25 @@ class Instrument:
         rom.seek(self._info_offset)
         b1 = rom.read_ubyte()
         b2 = rom.read_ubyte()
-        if b2 == 0: # In this cause, b1 is the sound number.
+        if b2 == 0:  # In this cause, b1 is the sound number.
             sound_number = b1
             # No clue what this is.
             unknown = rom.read(2)
             assert unknown == '\x85\x01'
             b2 = rom.read_ubyte()
-        if b2 == 0xa9: # Percussion
+        if b2 == 0xa9:  # Percussion
             # Next value is the pitch value to use no matter what midi note is given.
             self.is_percussion = True
             self.pitch = rom.read_ushort()
-        elif b2 == 0xa5: # Melodic
+        elif b2 == 0xa5:  # Melodic
             self.is_percussion = False
             # No clue what this is.
             unknown = rom.read(4)
             assert unknown == '\x0c\x0a\xaa\xbf'
             self.pitch = self.read_ushort_list_at(rom, self.read_3_byte_address(rom), 0x80)
         else:
-            raise Exception('Unexpected value while loading instrument {}. Tell: 0x{:x}. Value: 0x{:x}'.format(self.instrument_number, rom.tell(), b2))
+            raise Exception('Unexpected value while loading instrument {}. '
+                            'Tell: 0x{:x}. Value: 0x{:x}'.format(self.instrument_number, rom.tell(), b2))
         # No clue what this is.
         unknown = rom.read(5)
         assert unknown == '\x85\x03\xa6\x0e\xbf'

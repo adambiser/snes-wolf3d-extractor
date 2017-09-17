@@ -6,6 +6,7 @@ import utils
 from importlib import import_module
 from utils import *
 
+
 '''
 Help for finding entries:
 First Map:
@@ -14,9 +15,11 @@ First Map:
 - Search for the hex values of this offset + 0xc00000.
 '''
 
+
 class Rom:
     def __init__(self, filename):
         """The crc32 of the given file is used to determine which rom information to use."""
+        self.f = None
         self.name = ''
         self.info = ''
         self.filename = filename
@@ -28,7 +31,8 @@ class Rom:
         with self:
             rom_info.init(self)
         print 'Detected ROM: "{}" (data crc32: {}{})'.format(self.name, self.datacrc32,
-                ", file crc32: {}".format(self.filecrc32) if self.filecrc32 != self.datacrc32 else "")
+                                                             ", file crc32: {}".format(self.filecrc32)
+                                                             if self.filecrc32 != self.datacrc32 else "")
 
     def __enter__(self):
         self.open()
@@ -47,7 +51,7 @@ class Rom:
                     self.offset_delta = 0x200
                 self.seek(0, 0)
             buf = self.read()
-        return (binascii.crc32(buf) & 0xFFFFFFFF)
+        return binascii.crc32(buf) & 0xFFFFFFFF
 
     def open(self):
         """Opens the rom for reading."""
@@ -71,7 +75,7 @@ class Rom:
 
     def seek(self, offset, whence=0):
         """Move to a new position within the rom."""
-        if whence==0:
+        if whence == 0:
             offset += self.offset_delta
         self.f.seek(offset, whence)
 

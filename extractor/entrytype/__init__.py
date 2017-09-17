@@ -2,6 +2,7 @@
 import abc as abc
 import os
 
+
 class AbstractEntry:
     """The base entry class.
 

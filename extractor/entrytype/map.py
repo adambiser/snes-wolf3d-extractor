@@ -2,6 +2,7 @@ from . import AbstractEntry
 from .. import utils
 import struct
 
+
 class Map(AbstractEntry):
     """Reads a Wolfenstein 3D map stored in the SNES format.
 
@@ -25,6 +26,9 @@ class Map(AbstractEntry):
 
     def __init__(self, offset, name):
         AbstractEntry.__init__(self, offset, name)
+        self._floorcodes = None
+        self._walls = None
+        self._objects = None
 
     def load(self, rom):
         rom.seek(self.offset)
@@ -69,15 +73,19 @@ class Map(AbstractEntry):
                 break
             x = struct.unpack('<B', x)[0]
             y = utils.read_ubyte(rom)
-##            assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
-##            assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
+            # assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
+            # assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
             if not (0 <= x <= Map._MAP_SIZE and 0 <= y <= Map._MAP_SIZE):
                 print '{} had an object located off the map at {}, {}. Correcting.'.format(self.name, x, y)
             # Correct out of bounds objects... TODO why does this happen?
-            if x < 0: x += Map._MAP_SIZE
-            if x >= Map._MAP_SIZE: x -= Map._MAP_SIZE
-            if y < 0: y += Map._MAP_SIZE
-            if y >= Map._MAP_SIZE: y -= Map._MAP_SIZE
+            if x < 0:
+                x += Map._MAP_SIZE
+            if x >= Map._MAP_SIZE:
+                x -= Map._MAP_SIZE
+            if y < 0:
+                y += Map._MAP_SIZE
+            if y >= Map._MAP_SIZE:
+                y -= Map._MAP_SIZE
             object_code = utils.read_ubyte(rom)
             self._objects.append({
                 'x': x,
@@ -174,7 +182,8 @@ class Map(AbstractEntry):
                     dirs.append("west")
                 if move_dir & Map._EAST:
                     dirs.append("east")
-            print 'Could not determine direction for pushwall at {},{}, choices: {}'.format(obj['x'], obj['y'], ', '.join(dirs))
+            print 'Could not determine direction ' \
+                  'for pushwall at {},{}, choices: {}'.format(obj['x'], obj['y'], ', '.join(dirs))
 
     @staticmethod
     def _is_valid_pushwall_direction(tiles, obj, move_coord_name, move_step):
@@ -204,12 +213,12 @@ class Map(AbstractEntry):
 
         This assumes that the given maps are in the DOS map format.
         """
-##        print "Saving %d maps to %s" % (len(maps), filename)
+        # print "Saving %d maps to %s" % (len(maps), filename)
         with open(filename, 'wb') as f:
             f.write('WDC3.1')
             utils.write_int(f, len(maps))
             utils.write_short(f, Map._PLANE_COUNT)
-            utils.write_short(f, 16) # map name length
+            utils.write_short(f, 16)  # map name length
             for m in maps:
                 f.write(m['name'] + '\00' * (16 - len(m['name'])))
                 utils.write_short(f, Map._MAP_SIZE)

@@ -2,6 +2,7 @@ from . import AbstractEntry
 from ..wav import wav
 import struct
 
+
 class Sound(AbstractEntry):
     # Configuration constants
     SAMPLE_RATE = 11025
@@ -9,6 +10,7 @@ class Sound(AbstractEntry):
     def __init__(self, offset, name, loop_offset=None):
         AbstractEntry.__init__(self, offset, name)
         self.loop_offset = loop_offset
+        self.brr = None
 
     def load(self, rom):
         rom.seek(self.offset)
@@ -36,8 +38,8 @@ class Sound(AbstractEntry):
         # Not sure what this value really means, but it works.
         offset_delta = rom.read_ushort()
         # Skip to offset list.
-##        print 'reading sound group 1 at {:x}'.format(rom.tell())
-##        print 'last_sound_1_offset: {:x}'.format(last_sound_1_offset)
+        # print 'reading sound group 1 at {:x}'.format(rom.tell())
+        # print 'last_sound_1_offset: {:x}'.format(last_sound_1_offset)
         rom.seek(0x400, 1)
         sounds = []
         while True:
@@ -51,25 +53,25 @@ class Sound(AbstractEntry):
             sound['offset'] = sound_info_offset_1 + 4 + data_offset
             # Convert loop offset to offset within sound data.
             sound['loop_offset'] = rom.read_ushort() - offset_delta - data_offset
-##        print 'found {} sounds'.format(len(sounds))
-##        print sounds
+        # print 'found {} sounds'.format(len(sounds))
+        # print sounds
         # Load information for the second group of sounds.
         # There are 4 unknown bytes between these groups.
         first_sound_2_offset = sound_info_offset_1 + 4 + last_sound_1_offset + 4
         rom.seek(sound_info_offset_2)
-##        print 'reading sound group 2 at {:x}'.format(rom.tell())
+        # print 'reading sound group 2 at {:x}'.format(rom.tell())
         # First offset is 0.
         sounds.append({})
         sound = sounds[-1]
         sound['offset'] = first_sound_2_offset + 0
-        sound['loop_offset'] = 0 # Never loops.
+        sound['loop_offset'] = 0  # Never loops.
         # Now read shorts until another 0 is found.
         for x in range(sounds_2_count):
             sounds.append({})
             sound = sounds[-1]
             sound['offset'] = first_sound_2_offset + rom.read_ushort()
-            sound['loop_offset'] = 0 # Never loops.
-##        print 'total: {} sounds'.format(len(sounds))
+            sound['loop_offset'] = 0  # Never loops.
+        # print 'total: {} sounds'.format(len(sounds))
         return sounds
 
     @staticmethod
@@ -112,7 +114,7 @@ class Sound(AbstractEntry):
                 nibble[1] = Sound.signed_nibble(b & 0xf)
                 for n in range(2):
                     out = (nibble[n] << chunk_range)
-                    #if chunk_filter == 0:
+                    # if chunk_filter == 0:
                     if chunk_filter == 1:
                         out += (15 / 16.0) * data[-1]
                     elif chunk_filter == 2:

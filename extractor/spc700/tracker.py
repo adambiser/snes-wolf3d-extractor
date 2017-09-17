@@ -10,6 +10,8 @@ http://patpend.net/technical/snes/snes.txt
 http://emureview.ztnet.com/developerscorner/SoundCPU/spc.htm
 https://github.com/snes9xgit/snes9x/blob/master/apu/bapu/dsp/SPC_DSP.cpp
 """
+
+
 class Tracker:
     """A simple monoaural tracker for exporting Wolfenstein 3D songs to WAV.
 
@@ -18,20 +20,20 @@ class Tracker:
 
     TODO: Clicking after note-off does still happen sometimes.
     """
-##    VOICE_COUNT = 8
+    # VOICE_COUNT = 8
     SAMPLE_RATE = 32000
     
     def __init__(self, instrument_list, sample_rate=SAMPLE_RATE):
         self.instrument_list = instrument_list
         self.sample_rate = sample_rate
 
-    def write(self, file, song_data):
+    def write(self, f, song_data):
         """Saves the song data to a WAV file."""
         # Convert song data to wav.
         data = self.convert_to_wav(song_data)
         # Save wav data.
         w = wav.Writer(self.sample_rate, 1, 16)
-        w.write(file, data)
+        w.write(f, data)
 
     @staticmethod
     def get_total_ticks(events):
@@ -82,6 +84,7 @@ class Tracker:
             output = [output[x] + vdata[x] for x in range(len(output))]
         return [wav.clamp_short(x) for x in output]
 
+
 class Event:
     """An event in the tracker song."""
     # Command constants
@@ -95,7 +98,7 @@ class Event:
     def __init__(self, command=None, voice=None, ticks=None, args=None):
         self.command = command
         self.voice = voice
-        self.ticks = ticks # Ticks AFTER the event.
+        self.ticks = ticks  # Ticks AFTER the event.
         self.args = args
 
     @classmethod
@@ -105,14 +108,21 @@ class Event:
 
     @staticmethod
     def get_command_name(code):
-        return ['Note On', 'Note Off', 'Pitch Bend', 'Change Instrument', 'End Song', 'Percussion Note On'][code - 1] if 1 <= code <= 6 else 'UNKNOWN'
+        return ['Note On',
+                'Note Off',
+                'Pitch Bend',
+                'Change Instrument',
+                'End Song',
+                'Percussion Note On'][code - 1] if 1 <= code <= 6 else 'UNKNOWN'
 
     def __str__(self):
-        return 'Voice {}, Ticks {}, Command: {}, args: {}'.format(self.voice, self.ticks, Event.get_command_name(self.command), self.args)
+        return 'Voice {}, Ticks {}, Command: {}, args: {}'.format(self.voice, self.ticks,
+                                                                  Event.get_command_name(self.command), self.args)
+
 
 class _Voice:
     """Represents a voice on the SPC700."""
-    _PITCH_BEND_CENTER = 0x80 # 0x80 means no pitch bend.
+    _PITCH_BEND_CENTER = 0x80  # 0x80 means no pitch bend.
     TICKS_PER_SECOND = 60
     _COUNT = 0
     # Note states
@@ -120,10 +130,10 @@ class _Voice:
     DECAY = 1
     SUSTAIN = 2
     RELEASE = 3
-    RATE_TABLE = [ None, 0x800, 0x600, 0x500, 0x400, 0x300, 0x280, 0x200,
-                   0x180, 0x140, 0x100, 0xc0, 0xa0, 0x80, 0x60, 0x50,
-                   0x40, 0x30, 0x28, 0x20, 0x18, 0x14, 0x10, 0xc,
-                   0xa, 0x8, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1]
+    RATE_TABLE = [None, 0x800, 0x600, 0x500, 0x400, 0x300, 0x280, 0x200,
+                  0x180, 0x140, 0x100, 0xc0, 0xa0, 0x80, 0x60, 0x50,
+                  0x40, 0x30, 0x28, 0x20, 0x18, 0x14, 0x10, 0xc,
+                  0xa, 0x8, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1]
 
     def __init__(self, sample_rate, total_ticks):
         _Voice._COUNT += 1
@@ -155,9 +165,9 @@ class _Voice:
         self.active = True
         self.env_state = _Voice.ATTACK
         self.env_counter = 1
-        if not note_number is None:
+        if note_number is not None:
             self.pitch = self.instrument.pitch[note_number]
-        if not velocity is None:
+        if velocity is not None:
             self.velocity = self.velocity_table[velocity]
         self.buffer_pos = 0
 
@@ -166,11 +176,12 @@ class _Voice:
         self.env_state = _Voice.RELEASE
         self.pitch_bend = 0
         # Fade note to 0 so there's no clicking.
-        if not self.instrument is None:
+        if self.instrument is not None:
             sample_count = 50
             fade_buffer = [0] * sample_count
             self.write_samples(fade_buffer, 0, sample_count)
-            fade_buffer = [int(fade_buffer[x] * ((sample_count - x) / float(sample_count))) for x in range(sample_count)]
+            fade_buffer = [int(fade_buffer[x] * ((sample_count - x) / float(sample_count)))
+                           for x in range(sample_count)]
             for x in range(1, sample_count):
                 if (fade_buffer[x] == 0) or ((fade_buffer[x - 1] < 0) != (fade_buffer[x] < 0)):
                     fade_buffer = fade_buffer[:x]
@@ -200,7 +211,7 @@ class _Voice:
             output_pos = self.output_pos
             self.write_samples(self.output, output_pos, sample_count)
         # Process any fade buffer caused by a note off.
-        if not self.fade_buffer is None:
+        if self.fade_buffer is not None:
             output_pos = self.output_pos
             for s in range(len(self.fade_buffer)):
                 self.output[output_pos + s] += self.fade_buffer[s]
@@ -230,9 +241,9 @@ class _Voice:
             int_buffer_pos = int(buffer_pos)
             sample = inst_data[int_buffer_pos] * (1 - interp_pos)
             if buffer_pos + 1 < inst_data_len:
-                sample += inst_data[int_buffer_pos + 1] * (interp_pos)
-            elif not loop_offset is None:
-                sample += inst_data[loop_offset] * (interp_pos)
+                sample += inst_data[int_buffer_pos + 1] * interp_pos
+            elif loop_offset is not None:
+                sample += inst_data[loop_offset] * interp_pos
             self.env_counter -= 1
             if self.env_counter <= 0:
                 self.do_envelope()
@@ -262,16 +273,20 @@ class _Voice:
                 rate = self.adsr1 & 0x1f
                 if self.env_state == _Voice.DECAY:
                     rate = (self.adsr0 >> 3 & 0xe) + 0x10
-            else: # ATTACK
+            else:  # ATTACK
                 rate = (self.adsr0 & 0x0f) * 2 + 1
                 envelope += 0x20 if rate < 31 else 0x400
             if ((envelope >> 8) == (env_data >> 5)) and (self.env_state == _Voice.DECAY):
-		self.env_state = _Voice.SUSTAIN
-	    if envelope > 0x7ff or envelope < 0:
-                envelope = 0 if envelope < 0 else 0x7ff
-                if self.env_state == _Voice.ATTACK:
-                    self.env_state = _Voice.DECAY
+                self.env_state = _Voice.SUSTAIN
+            if envelope > 0x7ff or envelope < 0:
+                    envelope = 0 if envelope < 0 else 0x7ff
+                    if self.env_state == _Voice.ATTACK:
+                        self.env_state = _Voice.DECAY
         self.envelope = envelope
         self.env_vol = envelope / float(0x7ff)
         self.env_counter = _Voice.RATE_TABLE[rate]
-##        print '{} State {} - {}, {}, {}'.format(self._voice_number, self.env_state, self.envelope, self.env_vol, self.env_counter)
+        # print '{} State {} - {}, {}, {}'.format(self._voice_number,
+        #                                         self.env_state,
+        #                                         self.envelope,
+        #                                         self.env_vol,
+        #                                         self.env_counter)

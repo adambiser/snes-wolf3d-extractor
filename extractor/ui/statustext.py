@@ -1,5 +1,6 @@
 import Tkinter as tk
 
+
 class StatusText(tk.LabelFrame):
     def __init__(self, parent, **options):
         tk.LabelFrame.__init__(self, parent, **options)
@@ -17,16 +18,16 @@ class StatusText(tk.LabelFrame):
         scrollbar.pack(anchor=tk.NE,
                        side=tk.RIGHT,
                        fill=tk.Y,
-                       padx=(0,5),
+                       padx=(0, 5),
                        pady=5,
                        )
         self.textbox.pack(anchor=tk.NW,
-                       side=tk.LEFT,
-                       fill=tk.BOTH,
-                       expand=1,
-                       padx=(5,0),
-                       pady=5,
-                       )
+                          side=tk.LEFT,
+                          fill=tk.BOTH,
+                          expand=1,
+                          padx=(5, 0),
+                          pady=5,
+                          )
 
     def appendline(self, chars):
         if self.textbox.get('1.0', 'end-1c'):

@@ -1,5 +1,6 @@
 from . import AbstractEntry
 
+
 class Palette(AbstractEntry):
     """Reads a SNES style 15-bit palette and converts to it a 32-bit
     RGBA palette.
@@ -34,11 +35,11 @@ class Palette(AbstractEntry):
         
         ex: FF 7F => 255,255,255
         """
-        r = ((color) % 32) * 8
+        r = (color % 32) * 8
         g = ((color >> 5) % 32) * 8
         b = ((color >> 10) % 32) * 8
         a = 0xff
-        return (r, g, b, a)
+        return r, g, b, a
 
     @staticmethod
     def convert_rgb_to_15_bit(color):

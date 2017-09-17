@@ -1,11 +1,13 @@
 from . import AbstractEntry
 
+
 class ByteData(AbstractEntry):
     """This class is just a byte array read directly from the ROM."""
 
     def __init__(self, offset, length, name='unknown'):
         AbstractEntry.__init__(self, offset, name)
         self._length = length
+        self._data = None
 
     def load(self, rom):
         rom.seek(self.offset)

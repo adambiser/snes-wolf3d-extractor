@@ -1,7 +1,9 @@
 import Tkinter as tk
 
+
 class OptionsFrame(tk.LabelFrame):
     COLUMNS = 3
+
     def __init__(self, parent, settings, **options):
         tk.LabelFrame.__init__(self, parent, **options)
         self.config(text='Export Options',

@@ -4,6 +4,7 @@ import utils
 import Tkinter as tk
 from statustext import StatusText
 
+
 class EntryListTopLevel(tk.Toplevel):
     def __init__(self, master=None, filename=None, **options):
         tk.Toplevel.__init__(self, master, **options)
@@ -24,4 +25,3 @@ class EntryListTopLevel(tk.Toplevel):
         textbox.textbox.see('1.0')
         self.transient(master)
         self.grab_set()
-        

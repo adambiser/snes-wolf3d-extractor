@@ -2,7 +2,9 @@ from ..entrytype import *
 from ..utils import insert_string
 import struct
 
+
 # These must be modified by rom info files using this one as their base.
+
 
 def init(rom, **kwargs):
     # Using USA rom values as default.
@@ -21,12 +23,12 @@ def init(rom, **kwargs):
     rom.add_entry(InstrumentList(instrument_info_offset, 'instruments'))
     if has_ball_texture:
         rom.add_entry(Image(starting_offset, 'ball_texture', Image.LINEAR_8BIT_RMO, 64, 64, "main"))
-        rom.add_entry(ByteData(-1, 1)) # There is 1 more byte, padding?
+        rom.add_entry(ByteData(-1, 1))  # There is 1 more byte, padding?
         rom.add_entry(Palette(-1, 'title'))
     else:
         rom.add_entry(Palette(starting_offset, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
-    rom.add_entry(ByteData(-1, 64)) # 64 bytes of unknown data.
+    rom.add_entry(ByteData(-1, 64))  # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
     rom.add_entry(Palette(-1, 'briefing'))
     if is_japan:
@@ -37,7 +39,7 @@ def init(rom, **kwargs):
         rom.add_entry(Image(-1, 'mission_intro_5', Image.PLANAR_8BIT, 13, 4, "briefing"))
         rom.add_entry(Image(-1, 'mission_intro_6', Image.PLANAR_8BIT, 23, 4, "briefing"))
     else:
-        rom.add_entry(ByteData(-1, 64)) # 64 bytes of unknown data.
+        rom.add_entry(ByteData(-1, 64))  # 64 bytes of unknown data.
         rom.add_entry(Image(-1, 'mission_briefing', Image.PLANAR_8BIT, 32, 24, "briefing"))
     rom.add_entry(Palette(-1, 'intermission'))
     rom.add_entry(Image(-1, 'intermission_background', Image.PLANAR_4BIT, 8, 8, "intermission", 0x50))
@@ -71,7 +73,7 @@ def init(rom, **kwargs):
     rom.add_entry(Image(-1, 'intermission_exclamation', Image.PLANAR_4BIT, 1, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'overhead_map_tiles', Image.PLANAR_8BIT, 8, 5, "main"))
     rom.add_entry(Palette(-1, 'main'))
-    rom.add_entry(ByteData(-1, 0x2300)) # Unknown data that's 0x2300 bytes long.
+    rom.add_entry(ByteData(-1, 0x2300))  # Unknown data that's 0x2300 bytes long.
     rom.add_entry(Image(-1, 'status_bar_left_text', Image.PLANAR_4BIT, 14, 1, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_percent', Image.PLANAR_4BIT, 1, 2, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_right_text', Image.PLANAR_4BIT, 11, 1, "main", 0xf0, 0xf0))
@@ -119,15 +121,16 @@ def init(rom, **kwargs):
         entry_name = 'sound_{:02d}'.format(x)
         rom.add_entry(
             Sound(sound_info[x]['offset'],
-                   entry_name,
-                   sound_info[x]['loop_offset']
-                   )
+                  entry_name,
+                  sound_info[x]['loop_offset']
+                  )
             )
     # Songs
     song_offsets = read_rom_address_list(rom, song_offset_list_offset, 12)
     for x in range(len(song_offsets)):
         entry_name = 'song_{:02d}'.format(x)
         rom.add_entry(Song(song_offsets[x], entry_name))
+
 
 def read_rom_address_list(rom, offset, count):
     """Reads a list of addresses in Wolf3D's weird storage method.
@@ -142,6 +145,7 @@ def read_rom_address_list(rom, offset, count):
         address = '\00' * zb + rom.read(4 - zb)
         offsets.append(struct.unpack('<I', address)[0] - 0xc00000)
     return offsets
+
 
 def read_sprite_info(rom, column_count_offset, sprite_data_offset):
     """Reads sprite offsets and column counts from the rom.
@@ -171,4 +175,3 @@ def read_sprite_info(rom, column_count_offset, sprite_data_offset):
         if jump_amount & 0x80:
             break
     return sprites
-

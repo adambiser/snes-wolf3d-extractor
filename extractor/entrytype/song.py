@@ -5,6 +5,7 @@ from ..spc700.tracker import Tracker
 from ..spc700.tracker import Event
 import struct
 
+
 class Song(AbstractEntry):
     """Represents a song. When loaded, the entry consists of an array of
     Tracker.Event objects which can be passed to the tracker to write a WAV.
@@ -12,14 +13,15 @@ class Song(AbstractEntry):
 
     def __init__(self, offset, name):
         AbstractEntry.__init__(self, offset, name)
+        self._instruments = None
+        self.events = None
 
     def load(self, rom):
         self._instruments = rom.get_entry(rom.get_entries_of_class(InstrumentList)[0])
         rom.seek(self.offset)
         # Load song into an array of song events.
-        events = []
         # First entry is a pseudo-event for instrument numbers.
-        events.append(Event(args=[rom.read_ubyte()]))
+        events = [Event(args=[rom.read_ubyte()])]
         # Instrument numbers (corresponds to MIDI instruments).
         events[-1].args.extend(rom.read_ubyte() for x in range(events[-1].args[0]))
         # Read song data.
@@ -56,7 +58,7 @@ class Song(AbstractEntry):
                 break
             elif event.command == Event.PERCUSSION_NOTE_ON:
                 pass
-##            print event
+            # print event
         self.events = events
 
     def save(self, path, filename=None, filetype=None):

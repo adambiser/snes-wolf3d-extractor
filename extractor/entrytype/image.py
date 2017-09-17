@@ -2,6 +2,7 @@ from . import AbstractEntry
 from ..pypng import png
 import struct
 
+
 class Image(AbstractEntry):
     """Represents an image that is loaded from the rom.
 

@@ -6,6 +6,7 @@ import Tkinter as tk
 from tkFileDialog import askopenfilename
 import tkMessageBox
 
+
 class RomFrame(tk.Frame):
     def __init__(self, parent, settings, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
@@ -143,7 +144,7 @@ class RomFrame(tk.Frame):
         self.settings.rom_file.set(rom_file)
 
     def show_entry_list(self):
-        view = EntryListTopLevel(self, self.settings.rom_file.get())
+        EntryListTopLevel(self, self.settings.rom_file.get())
 
     def rom_changed(self, *args):
         rom_name_label = self.children['rom_name_label']

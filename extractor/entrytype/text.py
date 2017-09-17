@@ -1,6 +1,7 @@
 from . import ByteData
 import re
 
+
 class Text(ByteData):
     """An entry with simple ASCII text."""
 
@@ -8,6 +9,7 @@ class Text(ByteData):
         ByteData.__init__(self, offset, length, name)
         self.linesplit = linesplit
         self.has_length_byte = has_length_byte
+        self._data = None
         
     def load(self, rom):
         rom.seek(self.offset)
