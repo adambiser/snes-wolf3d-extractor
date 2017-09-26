@@ -141,16 +141,64 @@ def rom_2bebdb00(rom):
         ])
 
 
+def rom_2e94fa67(rom):
+    rom_63e442b4(rom)
+    rom.name = "Wolfenstein 3D (Beta 1 h1)"
+    rom.info = "h1 hack"
+
+
 def rom_4352c116(rom):
     rom_63e442b4(rom)
     rom.name = "Wolfenstein 3D (Beta 1 h1C)"
     rom.info = "h1C hack"
 
 
+def rom_fa5f7217(rom):
+    rom_63e442b4(rom)
+    rom.name = "Wolfenstein 3D (Beta 1 h2C)"
+    rom.info = "h2C hack"
+
+
+def rom_7916ef7e(rom):
+    rom_63e442b4(rom)
+    rom.name = "Wolfenstein 3D (Beta 1 t1)"
+    rom.info = "t1 trained (cheat)"
+
+
+def rom_297f980a(rom):
+    rom_cc47b8f9(rom)
+    rom.name = "Wolfenstein 3D (Japan h1)"
+    rom.info = "h1 hack"
+
+
+def rom_d519a019(rom):
+    rom_cc47b8f9(rom)
+    rom.name = "Wolfenstein 3D (Japan h1C)"
+    rom.info = "h1C hack"
+
+
+def rom_1f944394(rom):
+    rom_6582a8f5(rom)
+    rom.name = "Wolfenstein 3D (USA h1C)"
+    rom.info = "h1C hack"
+
+
+def rom_4ca00007(rom):
+    rom_6582a8f5(rom)
+    rom.name = "Wolfenstein 3D (USA t1)"
+    rom.info = "t1 trained (cheat)"
+
+
 def rom_a8c264da(rom):
     rom_6582a8f5(rom)
     rom.name = "Wolfenstein 3D (German)"
     rom.info = "Fan-made German translation"
+
+
+def rom_70347b26(rom):
+    rom_6582a8f5(rom)
+    rom.name = "Wolfenstein 3D (Spanish)"
+    rom.info = "Fan-made Spanish translation"
 
 
 ############################################
