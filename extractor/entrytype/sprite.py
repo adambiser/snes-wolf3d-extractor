@@ -15,9 +15,10 @@ class Sprite(Image):
         self._pixels = None
 
     def load(self, rom):
+        """Loads and converts sprite data into pixel data."""
         self._load_palette(rom)
         rom.seek(self.offset)
-        """Loads and converts sprite data into pixel data."""
+        # noinspection PyUnusedLocal
         pixels = [[self._transparency_color_index for x in range(self._width)] for y in range(self._height)]
         page_offset = (self.offset & 0xffff0000)
         pixel_x = (self._width - self._column_count) / 2

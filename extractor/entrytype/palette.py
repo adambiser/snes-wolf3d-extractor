@@ -2,9 +2,7 @@ from . import AbstractEntry
 
 
 class Palette(AbstractEntry):
-    """Reads a SNES style 15-bit palette and converts to it a 32-bit
-    RGBA palette.
-    """
+    """Reads a SNES style 15-bit palette and converts to it a 32-bit RGBA palette."""
     # Constants
     _DATA_LENGTH = 0x200
 
@@ -23,15 +21,14 @@ class Palette(AbstractEntry):
         filename = self._get_filename(path, filename, self.name + '.pal')
         with open(filename, "wb") as f:
             # Write RGB values, trim off Alpha.
-            f.write(str(bytearray([x for y in [z[0:3] for z in self.colors] for x in y])))
+            f.write(bytearray([x for y in [z[0:3] for z in self.colors] for x in y]))
 
     def _get_length(self):
         return Palette._DATA_LENGTH
 
     @staticmethod
     def convert_15bit_to_rgba(color):
-        """Converts a 15-bit color to a 32-bit RGBA tuple for use as the
-        palette for PNG file creation.
+        """Converts a 15-bit color to a 32-bit RGBA tuple for use as the palette for PNG file creation.
         
         ex: FF 7F => 255,255,255
         """

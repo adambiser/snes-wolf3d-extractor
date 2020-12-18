@@ -155,9 +155,9 @@ def read_sprite_info(rom, column_count_offset, sprite_data_offset):
     rom.seek(column_count_offset)
     sprites = []
     while True:
-        sprites.append({})
-        sprite = sprites[-1]
-        sprite['column_count'] = rom.read_ushort()
+        sprite_info = {
+            'column_count': rom.read_ushort(),
+        }
         offset = bytearray([0, 0, 0, 0])
         offset_index = rom.read_ubyte() - 1
         jump_amount = 0
@@ -169,7 +169,8 @@ def read_sprite_info(rom, column_count_offset, sprite_data_offset):
                 offset[offset_index] = byte
                 offset_index += 1
             jump_amount = rom.read_ubyte()
-        sprite['offset'] = sprite_data_offset + struct.unpack('<I', offset)[0]
+        sprite_info['offset'] = sprite_data_offset + struct.unpack('<I', offset)[0]
+        sprites.append(sprite_info)
         # Test if this bit is set and if so, stop.
         # Probably not the way it worked, but it works for all roms.
         if jump_amount & 0x80:

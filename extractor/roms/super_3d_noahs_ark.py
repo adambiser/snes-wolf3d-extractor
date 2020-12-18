@@ -4,7 +4,7 @@ import struct
 
 '''
 TODO
-Allow for non-retangular tiled image extraction
+Allow for non-rectangular tiled image extraction
 Example from S3DNA:
     [-1, 'overhead_map_tiles_1', Image, Image.PLANAR_8BIT, 8, 5, "main"],
     [-1, 'overhead_map_tiles_2', Image, Image.PLANAR_8BIT, 7, 1, "main"],
@@ -18,10 +18,10 @@ def init(rom, **kwargs):
     rom.add_entry(InstrumentList(instrument_info_offset, 'instruments'))
     rom.add_entry(Palette(starting_offset, 'title'))
     rom.add_entry(Palette(-1, 'title_dark'))
-    rom.add_entry(ByteData(-1, 64)) # 64 bytes of unknown data.
+    rom.add_entry(ByteData(-1, 64))  # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'title_screen', Image.PLANAR_8BIT, 32, 25, "title"))
     rom.add_entry(Palette(-1, 'briefing'))
-    rom.add_entry(ByteData(-1, 64)) # 64 bytes of unknown data.
+    rom.add_entry(ByteData(-1, 64))  # 64 bytes of unknown data.
     rom.add_entry(Image(-1, 'mission_briefing', Image.PLANAR_8BIT, 32, 24, "briefing"))
     rom.add_entry(Palette(-1, 'intermission'))
     rom.add_entry(Image(-1, 'intermission_background', Image.PLANAR_4BIT, 8, 8, "intermission", 0x50))
@@ -42,7 +42,7 @@ def init(rom, **kwargs):
     rom.add_entry(Image(-1, 'intermission_overall', Image.PLANAR_4BIT, 15, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'intermission_colon', Image.PLANAR_4BIT, 1, 2, "intermission", 0x20, 0x20))
     for x in range(10):
-        rom.add_entry(Image(-1, 'intermission_number_{}'.format(x), Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
+        rom.add_entry(Image(-1, f'intermission_number_{x}', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'intermission_percent', Image.PLANAR_4BIT, 2, 2, "intermission", 0x20, 0x20))
     rom.add_entry(Image(-1, 'intermission_exclamation', Image.PLANAR_4BIT, 1, 2, "intermission", 0x20, 0x20))
     # NOTE: This is different from the Wolf3D rom.
@@ -58,7 +58,7 @@ def init(rom, **kwargs):
     rom.add_entry(Image(-1, 'status_bar_numbers', Image.PLANAR_4BIT, 16, 2, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_faces', Image.PLANAR_4BIT, 16, 8, "main", 0xf0, 0xf0))
     for x in range(6):
-        rom.add_entry(Image(-1, 'weapon_{}'.format(x), Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
+        rom.add_entry(Image(-1, f'weapon_{x}', Image.PLANAR_4BIT, 16, 16, "main", 0xf0, 0xf0))
     # Add maps
     # Map offsets are stored as: 4A C9 CA 00
     # CA needs to become 0A.
@@ -95,9 +95,9 @@ def init(rom, **kwargs):
         entry_name = 'sound_{:02d}'.format(x)
         rom.add_entry(
             Sound(sound_info[x]['offset'],
-                   entry_name,
-                   sound_info[x]['loop_offset']
-                   )
+                  entry_name,
+                  sound_info[x]['loop_offset']
+                  )
             )
     # Songs
     for x in range(11):
@@ -105,8 +105,10 @@ def init(rom, **kwargs):
         entry_offset = rom.read_rom_address_from(0xFD881 + x * 4)
         rom.add_entry(Song(entry_offset, entry_name))
 
+
 def read_sprite_info_(rom, column_count_offset, sprite_data_offset):
-    """Reads sprite offsets and column counts from the rom.
+    """
+    Reads sprite offsets and column counts from the rom.
 
     SNA3D-style, simpler.
     """
@@ -115,9 +117,9 @@ def read_sprite_info_(rom, column_count_offset, sprite_data_offset):
     while True:
         line_count = rom.read_ushort()
         if line_count == 0:
-            break;
-        sprites.append({})
-        sprite = sprites[-1]
-        sprite['column_count'] = line_count
-        sprite['offset'] = sprite_data_offset + struct.unpack('<I', rom.read(4))[0]
+            break
+        sprites.append({
+            'column_count': line_count,
+            'offset': sprite_data_offset + struct.unpack('<I', rom.read(4))[0],
+        })
     return sprites

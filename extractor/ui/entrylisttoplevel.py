@@ -1,7 +1,7 @@
 from extractor.rom import Rom
 import os
-import utils
-import Tkinter as tk
+import ui.utils as ui_utils
+import tkinter as tk
 from statustext import StatusText
 
 
@@ -10,7 +10,7 @@ class EntryListTopLevel(tk.Toplevel):
         tk.Toplevel.__init__(self, master, **options)
         self.wm_title('Entries in ' + os.path.basename(filename))
         self.minsize(400, 600)
-        utils.center_window(self, 400, 600)
+        ui_utils.center_window(self, 400, 600)
         textbox = StatusText(self)
         textbox.config(text='Entries')
         textbox.pack(anchor=tk.NW,

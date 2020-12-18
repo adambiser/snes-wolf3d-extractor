@@ -208,6 +208,6 @@ def rom_70347b26(rom):
 
 def init(rom):
     try:
-        globals()['rom_' + rom.datacrc32](rom)
-    except KeyError as e:
+        globals()[f'rom_{rom.datacrc32}'](rom)
+    except KeyError:
         raise RomInfoNotFoundError(rom.datacrc32 + ("file: " + rom.filecrc32 if rom.filecrc32 != rom.filecrc32 else ""))

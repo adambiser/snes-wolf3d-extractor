@@ -40,8 +40,9 @@ class Map(AbstractEntry):
     def readcompressedmap(self, rom):
         # Assuming this is an uncompressed size, but since this code doesn't do
         # anything with the data after the object list, ignore.
+        # noinspection PyUnusedLocal
         uncompressed_size = utils.read_ushort(rom)
-        self._walls = [0 for x in range(Map._MAP_SIZE * Map._MAP_SIZE + 64)]
+        self._walls = [0 for _ in range(Map._MAP_SIZE * Map._MAP_SIZE + 64)]
         # Read and decompress the wall data.
         tag = utils.read_ubyte(rom)
         # Number of bits for the value of 'count' down below.
@@ -76,7 +77,7 @@ class Map(AbstractEntry):
             # assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
             # assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
             if not (0 <= x <= Map._MAP_SIZE and 0 <= y <= Map._MAP_SIZE):
-                print '{} had an object located off the map at {}, {}. Correcting.'.format(self.name, x, y)
+                print(f'{self.name} had an object located off the map at {x}, {y}. Correcting.')
             # Correct out of bounds objects... TODO why does this happen?
             if x < 0:
                 x += Map._MAP_SIZE
@@ -97,7 +98,8 @@ class Map(AbstractEntry):
                 self._objects[-1]['wall'] = utils.read_ubyte(rom)
 
     def generate_dos_map(self):
-        """Converts the SNES map data to DOS map format.
+        """
+        Converts the SNES map data to DOS map format.
 
         This is not perfect because of how pushwalls work in the SNES.
         See _fix_pushwall() for further information.
@@ -105,6 +107,7 @@ class Map(AbstractEntry):
         Returns a dict with the map's name in 'name' and plane data in 'tiles'.
         """
         # Convert wall code
+        # noinspection PyUnusedLocal
         tiles = [[0 for x in range(len(self._walls))] for p in range(Map._PLANE_COUNT)]
         for index in range(0, len(self._walls)):
             tiles[0][index] = self._walls[index]
@@ -132,7 +135,8 @@ class Map(AbstractEntry):
 
     @staticmethod
     def _fix_pushwall(tiles, obj):
-        """Converts the SNES pushwalls into tiles that DOS pushwalls need to work.
+        """
+        Converts the SNES pushwalls into tiles that DOS pushwalls need to work.
 
         SNES pushwalls are objects with a wall code that moves two spaces and go
         into a wall in its final resting spot.
@@ -182,8 +186,7 @@ class Map(AbstractEntry):
                     dirs.append("west")
                 if move_dir & Map._EAST:
                     dirs.append("east")
-            print 'Could not determine direction ' \
-                  'for pushwall at {},{}, choices: {}'.format(obj['x'], obj['y'], ', '.join(dirs))
+            print(f'Could not determine direction for pushwall at {obj["x"]},{obj["y"]}, choices: {", ".join(dirs)}')
 
     @staticmethod
     def _is_valid_pushwall_direction(tiles, obj, move_coord_name, move_step):
@@ -209,13 +212,14 @@ class Map(AbstractEntry):
 
     @staticmethod
     def save_as_wdc_map_file(filename, maps):
-        """Saves all given maps to a single WDC map file
+        """
+        Saves all given maps to a single WDC map file
 
         This assumes that the given maps are in the DOS map format.
         """
         # print "Saving %d maps to %s" % (len(maps), filename)
         with open(filename, 'wb') as f:
-            f.write('WDC3.1')
+            f.write(b'WDC3.1')
             utils.write_int(f, len(maps))
             utils.write_short(f, Map._PLANE_COUNT)
             utils.write_short(f, 16)  # map name length

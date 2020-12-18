@@ -1,4 +1,3 @@
-from ..utils import *
 from ..wav import wav
 
 """
@@ -50,6 +49,7 @@ class Tracker:
         # Calculate total song length now for faster processing.
         total_ticks = Tracker.get_total_ticks(events)
         voint_count = Tracker.get_voice_count(events)
+        # noinspection PyUnusedLocal
         voices = [_Voice(self.sample_rate, total_ticks) for v in range(voint_count)]
         ticks = 0
         # Start at 1 to skip past the instrument list at the beginning.
@@ -58,7 +58,7 @@ class Tracker:
             if ticks > 0:
                 for v in voices:
                     v.process_ticks(ticks)
-                ticks = 0
+                # ticks = 0
             # Process event.
             ticks = event.ticks
             voice = voices[event.voice]
@@ -157,6 +157,9 @@ class _Voice:
         # These values are from SPC dumps using snes9x. They never seem to change.
         self.adsr0 = 0xfe
         self.adsr1 = 0xe9
+        self.sound_data = None
+        self.loop_offset = None
+        self.velocity_table = None
 
     def get_audio_data(self):
         return self.output
@@ -279,9 +282,9 @@ class _Voice:
             if ((envelope >> 8) == (env_data >> 5)) and (self.env_state == _Voice.DECAY):
                 self.env_state = _Voice.SUSTAIN
             if envelope > 0x7ff or envelope < 0:
-                    envelope = 0 if envelope < 0 else 0x7ff
-                    if self.env_state == _Voice.ATTACK:
-                        self.env_state = _Voice.DECAY
+                envelope = 0 if envelope < 0 else 0x7ff
+                if self.env_state == _Voice.ATTACK:
+                    self.env_state = _Voice.DECAY
         self.envelope = envelope
         self.env_vol = envelope / float(0x7ff)
         self.env_counter = _Voice.RATE_TABLE[rate]

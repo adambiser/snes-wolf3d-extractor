@@ -26,7 +26,8 @@ class Sound(AbstractEntry):
 
     @staticmethod
     def read_sound_info(rom, sound_info_offset_1, sound_info_offset_2, sounds_2_count):
-        """Returns an array of sound offset dicts.
+        """
+        Returns an array of sound offset dicts.
 
         For each sound offset dict:
         'offset' - The offset of the sound within the rom.
@@ -91,7 +92,8 @@ class Sound(AbstractEntry):
         return (x | ~7) if (x & 8) else (x & 7)
 
     def get_wav_info(self):
-        """Converts the brr sound data to raw 16-bit WAV data.
+        """
+        Converts the brr sound data to raw 16-bit WAV data.
 
         Returns a dict with the following entries:
         'data' - The converted WAV data.
@@ -99,11 +101,11 @@ class Sound(AbstractEntry):
         'loop_offset' - Offset to the loop start within the WAV data.
         """
         nibble = [0, 0]
-        end_flag = 0
+        # end_flag = 0
         data = []
         looping = False
         for block in self.brr:
-            end_flag = (block[0] & 1) != 0
+            # end_flag = (block[0] & 1) != 0
             loop_flag = (block[0] & 2) != 0
             if loop_flag and not looping:
                 looping = True

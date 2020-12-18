@@ -1,7 +1,6 @@
-import os
-import Tkinter as tk
-import tkMessageBox
-from tkFileDialog import askdirectory
+import tkinter as tk
+import tkinter.messagebox
+from tkinter.filedialog import askdirectory
 from romframe import RomFrame
 from optionsframe import OptionsFrame
 from settings import Settings
@@ -9,10 +8,11 @@ from statustext import StatusText
 from extractor.rom import Rom
 from extractor.entrytype import *
 import extractor.utils as utils
-import utils as ui_utils
+import ui.utils as ui_utils
 
 
 class MainApplication(tk.Tk):
+    # noinspection PyArgumentCasing
     def __init__(self, screenName=None, baseName=None, className='Tk', useTk=1):
         # Set up the window.
         tk.Tk.__init__(self, screenName, baseName, className, useTk)
@@ -69,6 +69,7 @@ class MainApplication(tk.Tk):
         # Force this code to run.
         self.on_rom_valid_changed()
 
+    # noinspection PyUnusedLocal
     def on_rom_valid_changed(self, *args):
         enabled = self.children['rom_frame'].is_rom_valid.get()
         self.button_frame.children['export_button'].config(state=tk.NORMAL if enabled else tk.DISABLED)
@@ -100,8 +101,8 @@ class MainApplication(tk.Tk):
             self.add_status('Exporting to: ' + export_folder)
             if os.listdir(export_folder):
                 self.add_status('Export folder not empty.')
-                if not tkMessageBox.askyesno('Confirmation', 'The folder does not appear to be empty.\n'
-                                                             'Existing files may be overwritten.\nContinue?'):
+                if not tkinter.messagebox.askyesno('Confirmation', 'The folder does not appear to be empty.\n'
+                                                                   'Existing files may be overwritten.\nContinue?'):
                     self.add_status('Aborted.')
                     return
                 self.add_status('Confirmed.')
@@ -112,7 +113,7 @@ class MainApplication(tk.Tk):
             # Save maps in a single file.
             if self.settings.combine_maps.get() and Map in export_classes:
                 gamemaps = [rom.get_entry(m).generate_dos_map() for m in rom.get_entries_of_class(Map)]
-                self.add_status('Exporting: {} maps to Maps.map'.format(len(gamemaps)))
+                self.add_status(f'Exporting: {len(gamemaps)} maps to Maps.map')
                 Map.save_as_wdc_map_file(export_folder + "/Maps.map", gamemaps)
             for index in range(rom.get_entry_count()):
                 if rom.get_entry_type(index) in export_classes:

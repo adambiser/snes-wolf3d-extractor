@@ -1,9 +1,5 @@
-from entrytype import *
 from roms import rom_info
 import binascii
-import struct
-import utils
-from importlib import import_module
 from utils import *
 
 
@@ -30,9 +26,9 @@ class Rom:
         # Load rom information into the rom object.
         with self:
             rom_info.init(self)
-        print 'Detected ROM: "{}" (data crc32: {}{})'.format(self.name, self.datacrc32,
-                                                             ", file crc32: {}".format(self.filecrc32)
-                                                             if self.filecrc32 != self.datacrc32 else "")
+        print('Detected ROM: "{}" (data crc32: {}{})').format(self.name, self.datacrc32,
+                                                              ", file crc32: {}".format(self.filecrc32)
+                                                              if self.filecrc32 != self.datacrc32 else "")
 
     def __enter__(self):
         self.open()
@@ -102,7 +98,7 @@ class Rom:
     def print_entry_list(self):
         """Prints the list of entries (offset and name) sorted by offset."""
         for e in self.get_entry_list():
-            print '0x{:x} - {} - {}'.format(e[0], e[1], e[2])
+            print('0x{:x} - {} - {}'.format(e[0], e[1], e[2]))
 
     def get_entry_count(self):
         """Returns the number of entries in the rom."""
@@ -114,7 +110,7 @@ class Rom:
 
     def get_entry_type(self, index):
         """Gets an entry's type."""
-        if isinstance(index, basestring):
+        if isinstance(index, str):
             index = self.get_entry_index(index)
         return self.entries[index].__class__
 
@@ -124,7 +120,7 @@ class Rom:
 
     def get_entry(self, index):
         """Loads and returns an entry from the rom."""
-        if isinstance(index, basestring):
+        if isinstance(index, str):
             index = self.get_entry_index(index)
         self.entries[index].load(self)
         return self.entries[index]

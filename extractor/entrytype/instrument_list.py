@@ -5,7 +5,8 @@ import textwrap
 
 
 class InstrumentList(AbstractEntry):
-    """The list of instruments used by the game to play music.
+    """
+    The list of instruments used by the game to play music.
 
     Instrument information was found through some guess work and through
     spc dumps using snes9x.
@@ -42,7 +43,7 @@ class InstrumentList(AbstractEntry):
                 assert unknown == '\x03\x4c'
                 info_offset = rom.read_ushort() + 1
             else:
-                raise Exception('Unexpected value: ' + hex(b1))
+                raise Exception(f'Unexpected value: {hex(b1)}')
             self.instruments[instrument_number] = Instrument(instrument_number, info_offset)
             has_another = (rom.read_ubyte() == 0xc9)
         # Load the instrument sound info.
@@ -60,8 +61,8 @@ class InstrumentList(AbstractEntry):
         return self.instruments[key]
 
     def __str__(self):
-        return '{} instruments:\n\n'.format(len(self.instruments)) + '\n\n'.join([str(self.instruments[i])
-                                                                                  for i in sorted(self.instruments)])
+        return f'{len(self.instruments)} instruments:\n\n' + '\n\n'.join([str(self.instruments[i])
+                                                                          for i in sorted(self.instruments)])
 
 
 class Instrument:
@@ -118,8 +119,8 @@ class Instrument:
         return struct.unpack('<I', rom.read(3) + '\00')[0] & 0x3fffff
 
     def read_ubyte_list_at(self, rom, offset, length):
-        """Reads a list of unsigned bytes from the rom and sets the position
-        back to where it was before reading then.
+        """
+        Reads a list of unsigned bytes from the rom and sets the position back to where it was before reading then.
         """
         previous_offset = rom.tell()
         rom.seek(offset)
@@ -128,8 +129,8 @@ class Instrument:
         return values
 
     def read_ushort_list_at(self, rom, offset, length):
-        """Reads a list of unsigned shorts from the rom and sets the position
-        back to where it was before reading then.
+        """
+        Reads a list of unsigned shorts from the rom and sets the position back to where it was before reading then.
         """
         previous_offset = rom.tell()
         rom.seek(offset)

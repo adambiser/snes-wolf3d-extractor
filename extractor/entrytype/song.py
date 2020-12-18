@@ -1,9 +1,7 @@
 from . import AbstractEntry
 from . import InstrumentList
-from ..wav import wav
 from ..spc700.tracker import Tracker
 from ..spc700.tracker import Event
-import struct
 
 
 class Song(AbstractEntry):
@@ -23,7 +21,7 @@ class Song(AbstractEntry):
         # First entry is a pseudo-event for instrument numbers.
         events = [Event(args=[rom.read_ubyte()])]
         # Instrument numbers (corresponds to MIDI instruments).
-        events[-1].args.extend(rom.read_ubyte() for x in range(events[-1].args[0]))
+        events[-1].args.extend(rom.read_ubyte() for _ in range(events[-1].args[0]))
         # Read song data.
         while True:
             event = Event.from_byte(rom.read_ubyte())

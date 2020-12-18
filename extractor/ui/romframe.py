@@ -2,9 +2,8 @@ from extractor.rom import Rom
 from extractor.exceptions import RomInfoNotFoundError
 from entrylisttoplevel import EntryListTopLevel
 import os
-import Tkinter as tk
-from tkFileDialog import askopenfilename
-import tkMessageBox
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
 
 
 class RomFrame(tk.Frame):
@@ -116,18 +115,18 @@ class RomFrame(tk.Frame):
                         sticky=tk.W+tk.E,
                         padx=(5, 0),
                         )
-##        lb_frame = tk.Frame(self)
-##        lb_scrollbar = tk.Scrollbar(lb_frame, orient=tk.VERTICAL)
-##        self.entry_listbox = tk.Listbox(lb_frame, yscrollcommand=lb_scrollbar.set)
-##        lb_scrollbar.config(command=self.entry_listbox.yview)
-##        lb_frame.grid(row=1, column=0, columnspan=3, sticky=tk.W+tk.E+tk.N+tk.S, pady=5)
-##        lb_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-##        self.entry_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        # lb_frame = tk.Frame(self)
+        # lb_scrollbar = tk.Scrollbar(lb_frame, orient=tk.VERTICAL)
+        # self.entry_listbox = tk.Listbox(lb_frame, yscrollcommand=lb_scrollbar.set)
+        # lb_scrollbar.config(command=self.entry_listbox.yview)
+        # lb_frame.grid(row=1, column=0, columnspan=3, sticky=tk.W+tk.E+tk.N+tk.S, pady=5)
+        # lb_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # self.entry_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         tk.Grid.columnconfigure(self, 0, uniform='a')
         tk.Grid.columnconfigure(self, 2, uniform='a')
         tk.Grid.columnconfigure(self, 1, weight=1, uniform='b')
         tk.Grid.columnconfigure(self, 3, weight=1, uniform='b')
-##        tk.Grid.rowconfigure(self, 1, weight=1)
+        # tk.Grid.rowconfigure(self, 1, weight=1)
         # Force this code to happen.
         self.rom_changed()
 
@@ -137,7 +136,7 @@ class RomFrame(tk.Frame):
             initialdir=initialdir,
             initialfile=initialfile,
             title='Select ROM',
-            filetypes =(('ROM files', '*.sfc;*.smc'), ('All files', '*.*')),
+            filetypes=(('ROM files', '*.sfc;*.smc'), ('All files', '*.*')),
             )
         if not rom_file:
             return
@@ -146,6 +145,7 @@ class RomFrame(tk.Frame):
     def show_entry_list(self):
         EntryListTopLevel(self, self.settings.rom_file.get())
 
+    # noinspection PyUnusedLocal
     def rom_changed(self, *args):
         rom_name_label = self.children['rom_name_label']
         rom_file = self.settings.rom_file.get()
@@ -155,14 +155,15 @@ class RomFrame(tk.Frame):
             with Rom(rom_file) as rom:
                 self.rom_name.set(rom.name)
                 self.rom_info.set(rom.info + ((', ' if len(rom.info) > 0 else '') +
-                        'Data offset: 0x{:x}'.format(rom.offset_delta) if rom.offset_delta > 0 else ''))
+                                              'Data offset: 0x{:x}'.format(rom.offset_delta) if rom.offset_delta > 0
+                                              else ''))
                 rom_name_label['background'] = self['background']
                 self.rom_crc32.set(rom.datacrc32 + ("File: " + rom.filecrc32 if rom.filecrc32 != rom.filecrc32 else ""))
                 self.entry_count.set(rom.get_entry_count())
                 self.children['view_entry_list_button'].config(state=tk.NORMAL)
                 self.is_rom_valid.set(True)
         except RomInfoNotFoundError as e:
-            print 'Could not detect ROM: {}'.format(e.crc32)
+            print(f'Could not detect ROM: {e.crc32}')
             self.rom_name.set('Could not find ROM information.')
             self.rom_info.set('')
             rom_name_label['background'] = 'red'

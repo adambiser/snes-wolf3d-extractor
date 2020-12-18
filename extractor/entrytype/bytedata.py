@@ -1,4 +1,4 @@
-from . import AbstractEntry
+from entrytype import AbstractEntry
 
 
 class ByteData(AbstractEntry):

@@ -1,7 +1,6 @@
 import inspect
 import json
-import os
-import Tkinter as tk
+import tkinter as tk
 if __name__ == "__main__":
     # Sloppy hack to get the relative import to work when running this as main without using -m flag.
     import sys
@@ -63,21 +62,22 @@ class Settings:
         cls.sort()
         return cls
 
+
 # For testing.
 if __name__ == "__main__":
     def callback(*args):
-        print 'Trace callback: ',
-        print args
+        print('Trace callback: ')
+        print(args)
 
     root = tk.Tk()
-    print "get_export_types: "
-    print Settings.get_export_types()
-    print
+    print("get_export_types: ")
+    print(Settings.get_export_types())
+    print()
     settings = Settings()
     settings.rom_file.trace('w', callback)
     settings.export['Sprite'].trace('w', callback)
     settings.from_dict({'rom_file': 'folder/file.sfc', 'export': {'Sprite': 0}})
-    print "json encode: "
-    print json.JSONEncoder(indent=4, separators=(',', ': ')).encode(settings.to_dict())
-    print ""
-    print settings.to_dict()
+    print("json encode: ")
+    print(json.JSONEncoder(indent=4, separators=(',', ': ')).encode(settings.to_dict()))
+    print("")
+    print(settings.to_dict())

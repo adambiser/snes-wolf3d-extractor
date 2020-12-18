@@ -29,9 +29,7 @@ def write_int(f, x):
 
 
 def create_path(path):
-    """Creates the given path and ignores the error raised if the path
-    already exists.
-    """
+    """Creates the given path and ignores the error raised if the path already exists."""
     try:
         os.makedirs(path)
     except OSError as exception:
