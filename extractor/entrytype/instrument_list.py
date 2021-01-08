@@ -138,6 +138,6 @@ class Instrument:
     def __str__(self):
         text = f'{self.instrument_number} ({"percussion" if self.is_percussion else "melodic"}): ' \
                f'Sound {self.sound_number}, length: {len(self.data)}, loops at {self.loop_offset}\n'
-        text += textwrap.fill(f'Pitch: {self.pitch}\n')
+        text += textwrap.fill(f'Pitch: {self.pitch}') + '\n'
         text += textwrap.fill(f'Velocity: {self.velocity}')
         return text
