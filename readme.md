@@ -15,11 +15,16 @@ Supported games:
 
 ### Prerequisites
 
-You will need Python 2.7 installed on your system.
+You will need Python 3.6 or later installed on your system.
+
+PyPNG is also needed.  Install using:
+
+`pip install -r requirements.txt`
+
 
 ### Installing
 
-Download the code and run extractor.py.
+Download the code and run `extractor.py`.
 
 ## License
 
