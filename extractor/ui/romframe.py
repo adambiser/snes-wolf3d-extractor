@@ -1,14 +1,15 @@
-from extractor.rom import Rom
-from extractor.exceptions import RomInfoNotFoundError
-from entrylisttoplevel import EntryListTopLevel
 import os
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 
+from ..exceptions import RomInfoNotFoundError
+from ..rom import Rom
+from .entrylisttoplevel import EntryListTopLevel
+
 
 class RomFrame(tk.Frame):
     def __init__(self, parent, settings, *args, **kwargs):
-        tk.Frame.__init__(self, parent, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
         self.parent = parent
         self.settings = settings
         self.settings.rom_file.trace("w", self.rom_changed)

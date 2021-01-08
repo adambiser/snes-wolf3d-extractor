@@ -1,19 +1,19 @@
-from . import ByteData
 import re
+
+from .bytedata import ByteData
 
 
 class Text(ByteData):
     """An entry with simple ASCII text."""
 
     def __init__(self, offset, length, name, linesplit='\x00', has_length_byte=False):
-        ByteData.__init__(self, offset, length, name)
+        super().__init__(offset, length, name)
         self.linesplit = linesplit
         self.has_length_byte = has_length_byte
         self._data = None
         
     def load(self, rom):
-        rom.seek(self.offset)
-        data = rom.read(self._length)
+        data = rom.read_text_chunk(self.offset, self._length)
         if self.has_length_byte:
             self._data = ''
             while data:

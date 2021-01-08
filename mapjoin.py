@@ -1,12 +1,14 @@
-from extractor.entrytype import Map
-from extractor.utils import *
 import os
 import struct
 from tempfile import TemporaryFile
 
+from extractor.entrytype import Map
+from extractor.utils import *
+
+
 def converttobin(f):
     uncompressed_size = read_ushort(f)
-    data = [0 for x in range(uncompressed_size)]
+    data = [0 for _ in range(uncompressed_size)]
     tag = read_ubyte(f)
     match_bits = read_ubyte(f)
     assert match_bits == 4
@@ -28,10 +30,11 @@ def converttobin(f):
     temp.seek(0)
     return temp
 
+
 def readbinmap(f, name):
     m = Map(0, name)
-    m._walls =  struct.unpack('B' * Map._MAP_SIZE * Map._MAP_SIZE, f.read(Map._MAP_SIZE * Map._MAP_SIZE))
-    m._floorcodes =  struct.unpack('B' * 64, f.read(64))
+    m._walls = struct.unpack('B' * Map._MAP_SIZE * Map._MAP_SIZE, f.read(Map._MAP_SIZE * Map._MAP_SIZE))
+    m._floorcodes = struct.unpack('B' * 64, f.read(64))
     f.seek(0x100, 1)
     object_count = read_ushort(f)
     object_offset = read_ushort(f)
@@ -39,25 +42,28 @@ def readbinmap(f, name):
     m.readobjects(f, object_count)
     return m.generate_dos_map()
 
+
 def convertbinmaps():
     maps = []
     for x in range(30):
-        filename = 'input/TEDSNES/MAP{}.BIN'.format(x)
-        print('Loading {}'.format(os.path.basename(filename)))
+        filename = f'input/TEDSNES/MAP{x}.BIN'
+        print(f'Loading {os.path.basename(filename)}')
         with open(filename, 'rb') as f:
             maps.append(readbinmap(f, os.path.basename(filename)))
     Map.save_as_wdc_map_file('SNESBIN.map', maps)
 
+
 def convertcmpmaps():
     maps = []
     for x in range(30):
-        filename = 'input/TEDSNES/MAP{}.CMP'.format(x)
-        print('Loading {}'.format(os.path.basename(filename)))
+        filename = f'input/TEDSNES/MAP{x}.CMP'
+        print(f'Loading {os.path.basename(filename)}')
         with open(filename, 'rb') as f:
-            m = Map(0, os.path.basename(filename))
+            # m = Map(0, os.path.basename(filename))
             with converttobin(f) as bm:
                 maps.append(readbinmap(bm, os.path.basename(filename)))
     Map.save_as_wdc_map_file('SNESCMP.map', maps)
+
 
 convertbinmaps()
 convertcmpmaps()

@@ -3,7 +3,7 @@ import tkinter as tk
 
 class StatusText(tk.LabelFrame):
     def __init__(self, parent, **options):
-        tk.LabelFrame.__init__(self, parent, **options)
+        super().__init__(parent, **options)
         self.config(text='Status')
         self.parent = parent
         scrollbar = tk.Scrollbar(self,

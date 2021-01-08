@@ -1,13 +1,14 @@
-from extractor.rom import Rom
 import os
-import ui.utils as ui_utils
 import tkinter as tk
-from statustext import StatusText
+
+from . import utils as ui_utils
+from .statustext import StatusText
+from ..rom import Rom
 
 
 class EntryListTopLevel(tk.Toplevel):
     def __init__(self, master=None, filename=None, **options):
-        tk.Toplevel.__init__(self, master, **options)
+        super().__init__(master, **options)
         self.wm_title('Entries in ' + os.path.basename(filename))
         self.minsize(400, 600)
         ui_utils.center_window(self, 400, 600)

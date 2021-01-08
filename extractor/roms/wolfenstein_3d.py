@@ -1,6 +1,7 @@
+import struct
+
 from ..entrytype import *
 from ..utils import insert_string
-import struct
 
 
 # These must be modified by rom info files using this one as their base.
@@ -142,7 +143,7 @@ def read_rom_address_list(rom, offset, count):
         zb = rom.read_ubyte()
         assert 1 <= zb <= 3, 'zb is {}'.format(zb)
         zb -= 1
-        address = '\00' * zb + rom.read(4 - zb)
+        address = b'\00' * zb + rom.read(4 - zb)
         offsets.append(struct.unpack('<I', address)[0] - 0xc00000)
     return offsets
 

@@ -1,11 +1,12 @@
 import inspect
 import json
+import os
 import tkinter as tk
 if __name__ == "__main__":
     # Sloppy hack to get the relative import to work when running this as main without using -m flag.
     import sys
     sys.path.append('../..')
-from extractor.entrytype import *
+from ..entrytype import *
 
 
 class Settings:
@@ -52,15 +53,11 @@ class Settings:
 
     @staticmethod
     def get_export_types():
-        cls = list({name for name, cls in globals().items()
-                    if inspect.isclass(cls) and cls != AbstractEntry and issubclass(cls, AbstractEntry)})
-        cls.sort()
-        return cls
+        return sorted(list({name for name, cls in globals().items()
+                            if inspect.isclass(cls) and cls != AbstractEntry and issubclass(cls, AbstractEntry)}))
 
     def get_export_class_list(self):
-        cls = [globals()[key] for key, value in self.export.items() if value.get() == 1]
-        cls.sort()
-        return cls
+        return sorted([globals()[key] for key, value in self.export.items() if value.get() == 1], key=str)
 
 
 # For testing.

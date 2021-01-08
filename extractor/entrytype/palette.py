@@ -1,4 +1,6 @@
-from . import AbstractEntry
+import typing
+
+from .abstractentry import AbstractEntry
 
 
 class Palette(AbstractEntry):
@@ -7,14 +9,14 @@ class Palette(AbstractEntry):
     _DATA_LENGTH = 0x200
 
     def __init__(self, offset, name):
-        AbstractEntry.__init__(self, offset, name)
+        super().__init__(offset, name)
         self.colors = None
 
     def load(self, rom):
         # Check that the palette
         if self.colors is None:
             rom.seek(self.offset)
-            self.colors = [Palette.convert_15bit_to_rgba(rom.read_ushort()) for x in range(256)]
+            self.colors = [Palette.convert_15bit_to_rgba(rom.read_ushort()) for _ in range(256)]
 
     def save(self, path, filename=None, filetype=None):
         """Saves the palette data as a 24-bit RGB byte dump."""
@@ -27,7 +29,7 @@ class Palette(AbstractEntry):
         return Palette._DATA_LENGTH
 
     @staticmethod
-    def convert_15bit_to_rgba(color):
+    def convert_15bit_to_rgba(color: int):
         """Converts a 15-bit color to a 32-bit RGBA tuple for use as the palette for PNG file creation.
         
         ex: FF 7F => 255,255,255
@@ -39,9 +41,10 @@ class Palette(AbstractEntry):
         return r, g, b, a
 
     @staticmethod
-    def convert_rgb_to_15_bit(color):
+    def convert_rgb_to_15_bit(color: typing.Tuple[int, ...]) -> int:
         """Converts an 24-bit RGB or 32-bit RGBA color to 15-bit.
 
         ex: 255,255,255 => MSB: 0,11111,11 111,11111 LSB => FF 7F
         """
-        return (color[0] / 8) | ((color[1] / 8) << 5) + ((color[2] / 8) << 10)
+        r, g, b, *_ = color
+        return (r // 8) | ((g // 8) << 5) + ((b // 8) << 10)

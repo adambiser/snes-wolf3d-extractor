@@ -1,21 +1,23 @@
+import os
 import tkinter as tk
 import tkinter.messagebox
 from tkinter.filedialog import askdirectory
-from romframe import RomFrame
-from optionsframe import OptionsFrame
-from settings import Settings
-from statustext import StatusText
-from extractor.rom import Rom
-from extractor.entrytype import *
-import extractor.utils as utils
-import ui.utils as ui_utils
+
+from . import utils as ui_utils
+from .optionsframe import OptionsFrame
+from .romframe import RomFrame
+from .settings import Settings
+from .statustext import StatusText
+from .. import utils
+from ..entrytype import *
+from ..rom import Rom
 
 
 class MainApplication(tk.Tk):
-    # noinspection PyArgumentCasing
+    # noinspection PyPep8Naming
     def __init__(self, screenName=None, baseName=None, className='Tk', useTk=1):
         # Set up the window.
-        tk.Tk.__init__(self, screenName, baseName, className, useTk)
+        super().__init__(screenName, baseName, className, useTk)
         self.title('SNES Wolfenstein 3D Extractor')
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.settings = Settings()
@@ -106,21 +108,23 @@ class MainApplication(tk.Tk):
                     self.add_status('Aborted.')
                     return
                 self.add_status('Confirmed.')
-            self.config(cursor='wait')
-            # Save folder without generated subfolder.
-            self.settings.export_folder.set(folder)
-            export_classes = self.settings.get_export_class_list()
-            # Save maps in a single file.
-            if self.settings.combine_maps.get() and Map in export_classes:
-                gamemaps = [rom.get_entry(m).generate_dos_map() for m in rom.get_entries_of_class(Map)]
-                self.add_status(f'Exporting: {len(gamemaps)} maps to Maps.map')
-                Map.save_as_wdc_map_file(export_folder + "/Maps.map", gamemaps)
-            for index in range(rom.get_entry_count()):
-                if rom.get_entry_type(index) in export_classes:
-                    if rom.get_entry_type(index) is Map and self.settings.combine_maps.get():
-                        continue
-                    entry = rom.get_entry(index)
-                    self.add_status('Exporting: 0x{:x} - {}'.format(entry.offset, entry.name))
-                    entry.save(export_folder)
-        self.config(cursor='')
+            try:
+                self.config(cursor='wait')
+                # Save folder without generated subfolder.
+                self.settings.export_folder.set(folder)
+                export_classes = self.settings.get_export_class_list()
+                # Save maps in a single file.
+                if self.settings.combine_maps.get() and Map in export_classes:
+                    gamemaps = [rom.get_entry(m).generate_dos_map() for m in rom.get_entries_of_class(Map)]
+                    self.add_status(f'Exporting: {len(gamemaps)} maps to Maps.map')
+                    Map.save_as_wdc_map_file(export_folder + "/Maps.map", gamemaps)
+                for index in range(rom.get_entry_count()):
+                    if rom.get_entry_type(index) in export_classes:
+                        if rom.get_entry_type(index) is Map and self.settings.combine_maps.get():
+                            continue
+                        entry = rom.get_entry(index)
+                        self.add_status('Exporting: 0x{:x} - {}'.format(entry.offset, entry.name))
+                        entry.save(export_folder)
+            finally:
+                self.config(cursor='')
         self.add_status('Done')

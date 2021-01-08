@@ -1,14 +1,12 @@
-from ..entrytype import *
-from ..utils import insert_string
 import struct
 
-'''
-TODO
-Allow for non-rectangular tiled image extraction
-Example from S3DNA:
-    [-1, 'overhead_map_tiles_1', Image, Image.PLANAR_8BIT, 8, 5, "main"],
-    [-1, 'overhead_map_tiles_2', Image, Image.PLANAR_8BIT, 7, 1, "main"],
-'''
+from ..entrytype import *
+from ..utils import insert_string
+
+# TODO Allow for non-rectangular tiled image extraction
+# Example from S3DNA:
+#     [-1, 'overhead_map_tiles_1', Image, Image.PLANAR_8BIT, 8, 5, "main"],
+#     [-1, 'overhead_map_tiles_2', Image, Image.PLANAR_8BIT, 7, 1, "main"],
 
 
 def init(rom, **kwargs):
@@ -49,7 +47,7 @@ def init(rom, **kwargs):
     rom.add_entry(Image(-1, 'overhead_map_tiles_1', Image.PLANAR_8BIT, 8, 5, "main"))
     rom.add_entry(Image(-1, 'overhead_map_tiles_2', Image.PLANAR_8BIT, 7, 1, "main"))
     rom.add_entry(Palette(-1, 'main'))
-    rom.add_entry(ByteData(-1, 0x2300)) # Unknown data that's 0x2300 bytes long.
+    rom.add_entry(ByteData(-1, 0x2300))  # Unknown data that's 0x2300 bytes long.
     rom.add_entry(Image(-1, 'status_bar_left_text', Image.PLANAR_4BIT, 14, 1, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_percent', Image.PLANAR_4BIT, 1, 2, "main", 0xf0, 0xf0))
     rom.add_entry(Image(-1, 'status_bar_right_text', Image.PLANAR_4BIT, 11, 1, "main", 0xf0, 0xf0))
@@ -107,8 +105,7 @@ def init(rom, **kwargs):
 
 
 def read_sprite_info_(rom, column_count_offset, sprite_data_offset):
-    """
-    Reads sprite offsets and column counts from the rom.
+    """Reads sprite offsets and column counts from the rom.
 
     SNA3D-style, simpler.
     """

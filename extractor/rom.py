@@ -1,15 +1,14 @@
-from roms import rom_info
 import binascii
-from utils import *
+
+from .roms import rom_info
+from .utils import *
 
 
-'''
-Help for finding entries:
-First Map:
-- Search for "TELAS"
-- Go forward 0x38 bytes. This should be the offset of the first map.
-- Search for the hex values of this offset + 0xc00000.
-'''
+# Help for finding entries:
+# First Map:
+# - Search for "TELAS"
+# - Go forward 0x38 bytes. This should be the offset of the first map.
+# - Search for the hex values of this offset + 0xc00000.
 
 
 class Rom:
@@ -26,9 +25,8 @@ class Rom:
         # Load rom information into the rom object.
         with self:
             rom_info.init(self)
-        print('Detected ROM: "{}" (data crc32: {}{})').format(self.name, self.datacrc32,
-                                                              ", file crc32: {}".format(self.filecrc32)
-                                                              if self.filecrc32 != self.datacrc32 else "")
+        print(f'Detected ROM: "{self.name}" (data crc32: {self.datacrc32}'
+              f'{", file crc32: {self.filecrc32}" if self.filecrc32 != self.datacrc32 else ""})')
 
     def __enter__(self):
         self.open()
@@ -57,15 +55,15 @@ class Rom:
         """Closes the rom's inner file object."""
         self.f.close()
 
-    def read(self, size=-1):
+    def read(self, size: int = -1) -> bytes:
         """Reads the given number of bytes from the rom."""
         return self.f.read(size)
 
-    def read_ubyte(self):
+    def read_ubyte(self) -> int:
         """Reads an unsigned byte."""
         return read_ubyte(self)
 
-    def read_ushort(self):
+    def read_ushort(self) -> int:
         """Reads an unsigned short."""
         return read_ushort(self)
 
@@ -75,7 +73,7 @@ class Rom:
             offset += self.offset_delta
         self.f.seek(offset, whence)
 
-    def tell(self):
+    def tell(self) -> int:
         """Returns the current position within the rom."""
         return self.f.tell() - self.offset_delta
 
@@ -98,13 +96,13 @@ class Rom:
     def print_entry_list(self):
         """Prints the list of entries (offset and name) sorted by offset."""
         for e in self.get_entry_list():
-            print('0x{:x} - {} - {}'.format(e[0], e[1], e[2]))
+            print(f'{e[0]:#0x} - {e[1]} - {e[2]}')
 
-    def get_entry_count(self):
+    def get_entry_count(self) -> int:
         """Returns the number of entries in the rom."""
         return len(self.entries)
 
-    def get_entry_index(self, name):
+    def get_entry_index(self, name: str) -> int:
         """Gets the index of an entry by name."""
         return [entry.name for entry in self.entries].index(name)
 
@@ -118,23 +116,23 @@ class Rom:
         """Gets a list of indices of entries of the given class."""
         return [x for x in range(len(self.entries)) if self.entries[x].__class__ is cls]
 
-    def get_entry(self, index):
+    def get_entry(self, index: int):
         """Loads and returns an entry from the rom."""
         if isinstance(index, str):
             index = self.get_entry_index(index)
         self.entries[index].load(self)
         return self.entries[index]
 
-    def read_text_chunk(self, offset, length):
+    def read_text_chunk(self, offset: int, length: int) -> str:
         """Gets text from an offset within the rom."""
         self.seek(offset)
-        return self.read(length)
+        return self.read(length).decode("ascii")
 
-    def read_rom_address(self):
+    def read_rom_address(self) -> int:
         """Reads three bytes from the current location within the rom and converts it to an offset."""
-        return (struct.unpack('<i', self.read(3) + '\x00')[0] - 0xc00000) & 0xffffff
+        return (struct.unpack('<i', self.read(3) + b'\x00')[0] - 0xc00000) & 0xffffff
 
-    def read_rom_address_from(self, lookup_offset):
+    def read_rom_address_from(self, lookup_offset: int) -> int:
         """Reads a rom address from an offset within the rom."""
         self.seek(lookup_offset)
         return self.read_rom_address()

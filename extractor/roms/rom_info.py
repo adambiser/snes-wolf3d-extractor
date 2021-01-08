@@ -1,12 +1,10 @@
-from extractor.exceptions import RomInfoNotFoundError
-from extractor.entrytype import *
+from ..entrytype import *
+from ..exceptions import RomInfoNotFoundError
 
 
 ############################################
 # Super 3D Noah's Ark
 ############################################
-
-
 def rom_a2315a14(rom):
     from . import super_3d_noahs_ark as base
     rom.name = "Super 3D Noah's Ark (1994)"
@@ -45,8 +43,6 @@ def rom_f8662282(rom):
 ############################################
 # Wolfenstein 3D
 ############################################
-
-
 def rom_6582a8f5(rom):
     from . import wolfenstein_3d as base
     rom.name = "Wolfenstein 3D (USA)"
@@ -201,13 +197,10 @@ def rom_70347b26(rom):
     rom.info = "Fan-made Spanish translation"
 
 
-############################################
-# Main init function.
-############################################
-
-
 def init(rom):
+    """Loads ROM information based on the CRC32."""
     try:
         globals()[f'rom_{rom.datacrc32}'](rom)
     except KeyError:
-        raise RomInfoNotFoundError(rom.datacrc32 + ("file: " + rom.filecrc32 if rom.filecrc32 != rom.filecrc32 else ""))
+        raise RomInfoNotFoundError(rom.datacrc32 +
+                                   (f" file: {rom.filecrc32}" if rom.filecrc32 != rom.datacrc32 else ''))

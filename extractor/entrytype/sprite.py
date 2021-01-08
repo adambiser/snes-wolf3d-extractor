@@ -1,4 +1,4 @@
-from . import Image
+from .image import Image
 
 
 class Sprite(Image):
@@ -6,11 +6,12 @@ class Sprite(Image):
     SPRITE_SIZE = 64
 
     def __init__(self, offset, name, column_count, palette_name):
-        Image.__init__(self, offset, name, None,
-                       Sprite.SPRITE_SIZE,
-                       Sprite.SPRITE_SIZE,
-                       palette_name,
-                       transparency_color_index=0xff)
+        # Note: 0 is an invalid "Image" storage method.  This class overwrites load, so it's OK.
+        super().__init__(offset, name, 0,
+                         Sprite.SPRITE_SIZE,
+                         Sprite.SPRITE_SIZE,
+                         palette_name,
+                         transparency_color_index=0xff)
         self._column_count = column_count
         self._pixels = None
 
@@ -21,7 +22,7 @@ class Sprite(Image):
         # noinspection PyUnusedLocal
         pixels = [[self._transparency_color_index for x in range(self._width)] for y in range(self._height)]
         page_offset = (self.offset & 0xffff0000)
-        pixel_x = (self._width - self._column_count) / 2
+        pixel_x = (self._width - self._column_count) // 2
         for line in range(self._column_count):
             rom.seek(self.offset + line * 2)
             line_offset = page_offset + rom.read_ushort()
@@ -32,7 +33,7 @@ class Sprite(Image):
                 if top_y == 0xffff:
                     break
                 top_y >>= 1
-                bottom_y = rom.read_ushort() / 2
+                bottom_y = rom.read_ushort() // 2
                 pixel_offset = rom.read_ushort()
                 rom.seek(page_offset + pixel_offset + top_y)
                 for y in range(top_y, bottom_y):

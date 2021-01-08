@@ -1,6 +1,10 @@
-from . import AbstractEntry
-from .. import utils
 import struct
+import typing
+
+from .abstractentry import AbstractEntry
+from .. import utils
+if typing.TYPE_CHECKING:
+    from ..rom import Rom
 
 
 class Map(AbstractEntry):
@@ -25,7 +29,7 @@ class Map(AbstractEntry):
     _EAST = 0x8
 
     def __init__(self, offset, name):
-        AbstractEntry.__init__(self, offset, name)
+        super().__init__(offset, name)
         self._floorcodes = None
         self._walls = None
         self._objects = None
@@ -37,9 +41,9 @@ class Map(AbstractEntry):
         rom.seek(0x6, 1)
         self.readobjects(rom, object_count)
 
-    def readcompressedmap(self, rom):
-        # Assuming this is an uncompressed size, but since this code doesn't do
-        # anything with the data after the object list, ignore.
+    def readcompressedmap(self, rom: "Rom"):
+        # Assuming this is an uncompressed size, but since this code doesn't do anything with the data after the
+        # object list, ignore.
         # noinspection PyUnusedLocal
         uncompressed_size = utils.read_ushort(rom)
         self._walls = [0 for _ in range(Map._MAP_SIZE * Map._MAP_SIZE + 64)]
@@ -65,14 +69,14 @@ class Map(AbstractEntry):
         self._floorcodes = self._walls[-64:]
         self._walls = self._walls[:-64]
 
-    def readobjects(self, rom, object_count):
+    def readobjects(self, rom: "Rom", object_count: int):
         # Read the object list.
         self._objects = []
         for o in range(object_count):
-            x = rom.read(1)
-            if x == '':
+            bytes_x = rom.read(1)
+            if bytes_x == '':
                 break
-            x = struct.unpack('<B', x)[0]
+            x = struct.unpack('<B', bytes_x)[0]  # type: int
             y = utils.read_ubyte(rom)
             # assert 0 <= x <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
             # assert 0 <= y <= Map._MAP_SIZE, 'Object off the map at {}, {}'.format(x, y)
@@ -98,8 +102,7 @@ class Map(AbstractEntry):
                 self._objects[-1]['wall'] = utils.read_ubyte(rom)
 
     def generate_dos_map(self):
-        """
-        Converts the SNES map data to DOS map format.
+        """Converts the SNES map data to DOS map format.
 
         This is not perfect because of how pushwalls work in the SNES.
         See _fix_pushwall() for further information.
@@ -135,19 +138,15 @@ class Map(AbstractEntry):
 
     @staticmethod
     def _fix_pushwall(tiles, obj):
-        """
-        Converts the SNES pushwalls into tiles that DOS pushwalls need to work.
+        """Converts the SNES pushwalls into tiles that DOS pushwalls need to work.
 
-        SNES pushwalls are objects with a wall code that moves two spaces and go
-        into a wall in its final resting spot.
+        SNES pushwalls are objects with a wall code that moves two spaces and go into a wall in its final resting spot.
 
-        DOS pushwalls are moving walls and move two spots or until they hit a
-        wall.
+        DOS pushwalls are moving walls and move two spots or until they hit a wall.
 
-        This code places a pushwall's wall code into the wall plane and
-        when DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS is True,
-        this attempts to find the direction the pushwall is supposed to move
-        and sets that wall tile to the appropriate floor code.
+        This code places a pushwall's wall code into the wall plane and when
+        DETECT_PUSHWALL_DIRECTION_WHEN_CONVERTING_TO_DOS is True, this attempts to find the direction the pushwall is
+        supposed to move and sets that wall tile to the appropriate floor code.
         """
         index = obj['x'] + obj['y'] * Map._MAP_SIZE
         tiles[0][index] = obj['wall']
@@ -206,14 +205,13 @@ class Map(AbstractEntry):
         return tiles[0][steps[1]['x'] + steps[1]['y'] * Map._MAP_SIZE] == obj['wall']
 
     @staticmethod
-    def _is_dos_floor_code(code):
+    def _is_dos_floor_code(code: int) -> bool:
         """Returns True when code is a valid DOS map floor code."""
         return Map._FLOOR_CODE_START <= code <= Map._FLOOR_CODE_STOP
 
     @staticmethod
-    def save_as_wdc_map_file(filename, maps):
-        """
-        Saves all given maps to a single WDC map file
+    def save_as_wdc_map_file(filename: str, maps):
+        """Saves all given maps to a single WDC map file
 
         This assumes that the given maps are in the DOS map format.
         """
@@ -224,7 +222,8 @@ class Map(AbstractEntry):
             utils.write_short(f, Map._PLANE_COUNT)
             utils.write_short(f, 16)  # map name length
             for m in maps:
-                f.write(m['name'] + '\00' * (16 - len(m['name'])))
+                print(m['name'])
+                f.write(bytes(m['name'] + '\00' * (16 - len(m['name'])), encoding="ascii"))
                 utils.write_short(f, Map._MAP_SIZE)
                 utils.write_short(f, Map._MAP_SIZE)
                 for p in range(Map._PLANE_COUNT):

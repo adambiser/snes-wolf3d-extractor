@@ -5,7 +5,7 @@ class OptionsFrame(tk.LabelFrame):
     COLUMNS = 3
 
     def __init__(self, parent, settings, **options):
-        tk.LabelFrame.__init__(self, parent, **options)
+        super().__init__(parent, **options)
         self.config(text='Export Options',
                     padx=5,
                     pady=5)
@@ -24,8 +24,8 @@ class OptionsFrame(tk.LabelFrame):
         subframe = tk.LabelFrame(self, text='ROM Entry Types')
         subframe.pack(fill=tk.X,
                       )
-        keys = settings.export.keys()
-        keys.sort()
+        keys = sorted(settings.export.keys())
+        print(settings.export)
         row = 0
         col = 0
         for key in keys:

@@ -1,14 +1,14 @@
 from ..wav import wav
 
-"""
-Various websites that were helpful while trying to make sense of this:
-http://www.gamepilgrimage.com/sites/default/files/SystemSpecs/SNES/anomie/apudsp.txt
-http://pikensoft.com/old/docs/Super_Famicomm_sound_manual_(Ledi).txt
-http://optiroc.github.io/libSFX/files/SMP_Def-i.html
-http://patpend.net/technical/snes/snes.txt
-http://emureview.ztnet.com/developerscorner/SoundCPU/spc.htm
-https://github.com/snes9xgit/snes9x/blob/master/apu/bapu/dsp/SPC_DSP.cpp
-"""
+# Various websites that were helpful while trying to make sense of this:
+# http://www.gamepilgrimage.com/sites/default/files/SystemSpecs/SNES/anomie/apudsp.txt
+# http://pikensoft.com/old/docs/Super_Famicomm_sound_manual_(Ledi).txt
+# http://optiroc.github.io/libSFX/files/SMP_Def-i.html
+# http://patpend.net/technical/snes/snes.txt
+# http://emureview.ztnet.com/developerscorner/SoundCPU/spc.htm
+# https://github.com/snes9xgit/snes9x/blob/master/apu/bapu/dsp/SPC_DSP.cpp
+
+# TODO: Clicking after note-off does still happen sometimes.
 
 
 class Tracker:
@@ -17,7 +17,6 @@ class Tracker:
     Note: This does not emulate the SPC700 exactly.
     It uses linear interpolation for resampling.
 
-    TODO: Clicking after note-off does still happen sometimes.
     """
     # VOICE_COUNT = 8
     SAMPLE_RATE = 32000
@@ -48,9 +47,9 @@ class Tracker:
         """Converts the song data to wav data."""
         # Calculate total song length now for faster processing.
         total_ticks = Tracker.get_total_ticks(events)
-        voint_count = Tracker.get_voice_count(events)
+        voice_count = Tracker.get_voice_count(events)
         # noinspection PyUnusedLocal
-        voices = [_Voice(self.sample_rate, total_ticks) for v in range(voint_count)]
+        voices = [_Voice(self.sample_rate, total_ticks) for v in range(voice_count)]
         ticks = 0
         # Start at 1 to skip past the instrument list at the beginning.
         for event in events[1:]:
@@ -116,8 +115,8 @@ class Event:
                 'Percussion Note On'][code - 1] if 1 <= code <= 6 else 'UNKNOWN'
 
     def __str__(self):
-        return 'Voice {}, Ticks {}, Command: {}, args: {}'.format(self.voice, self.ticks,
-                                                                  Event.get_command_name(self.command), self.args)
+        return f'Voice {self.voice}, Ticks {self.ticks}, Command: {Event.get_command_name(self.command)}, ' \
+               f'args: {self.args}'
 
 
 class _Voice:
@@ -138,7 +137,7 @@ class _Voice:
     def __init__(self, sample_rate, total_ticks):
         _Voice._COUNT += 1
         self._voice_number = _Voice._COUNT
-        self.samples_per_tick_output = sample_rate / _Voice.TICKS_PER_SECOND
+        self.samples_per_tick_output = sample_rate // _Voice.TICKS_PER_SECOND
         self.output = [0] * total_ticks * self.samples_per_tick_output
         self.output_pos = 0
         # Current voice settings.
@@ -257,7 +256,7 @@ class _Voice:
     def do_envelope(self):
         """Do the volume envelope."""
         # Based on https://github.com/snes9xgit/snes9x/blob/master/apu/bapu/dsp/SPC_DSP.cpp#L206
-        # The rate table used by here is the inverse.
+        # The rate table used here is the inverse.
         envelope = self.envelope
         if self.env_state == _Voice.RELEASE:
             # This code never really happens here because of how the note off
@@ -288,8 +287,4 @@ class _Voice:
         self.envelope = envelope
         self.env_vol = envelope / float(0x7ff)
         self.env_counter = _Voice.RATE_TABLE[rate]
-        # print '{} State {} - {}, {}, {}'.format(self._voice_number,
-        #                                         self.env_state,
-        #                                         self.envelope,
-        #                                         self.env_vol,
-        #                                         self.env_counter)
+        # print('{self._voice_number} State {self.env_state} - {self.envelope}, {self.env_vol}, {self.env_counter}')

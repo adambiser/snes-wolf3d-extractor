@@ -3,32 +3,32 @@ import os
 import struct
 
 
-def read_ubyte(f):
+def read_ubyte(f) -> int:
     """Reads an unsigned byte."""
     return struct.unpack('<B', f.read(1))[0]
 
 
-def read_ushort(f):
+def read_ushort(f) -> int:
     """Reads an unsigned short."""
     return struct.unpack('<H', f.read(2))[0]
 
 
-def signed_nibble(x):
+def signed_nibble(x) -> int:
     """Converts an unsigned nibble to a signed nibble."""
     return (x | ~7) if (x & 8) else (x & 7)
 
 
-def write_short(f, x):
+def write_short(f, x: int):
     """Writes a signed short"""
     f.write(struct.pack('<h', x))
 
 
-def write_int(f, x):
+def write_int(f, x: int):
     """Writes a signed integer."""
     f.write(struct.pack('<i', x))
 
 
-def create_path(path):
+def create_path(path: str):
     """Creates the given path and ignores the error raised if the path already exists."""
     try:
         os.makedirs(path)
@@ -37,6 +37,6 @@ def create_path(path):
             raise
 
 
-def insert_string(string, index, insert):
+def insert_string(string: str, index: int, insert: str):
     """Inserts a string at a given index within another strings."""
     return string[:index] + insert + string[index:]

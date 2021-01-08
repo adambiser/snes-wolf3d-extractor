@@ -1,16 +1,18 @@
-from . import AbstractEntry
-from . import InstrumentList
-from ..spc700.tracker import Tracker
+from .abstractentry import AbstractEntry
+from .instrument_list import InstrumentList
 from ..spc700.tracker import Event
+from ..spc700.tracker import Tracker
 
 
 class Song(AbstractEntry):
-    """Represents a song. When loaded, the entry consists of an array of
-    Tracker.Event objects which can be passed to the tracker to write a WAV.
+    """Represents a song.
+
+    When loaded, the entry consists of an array of Tracker.Event objects which can be passed to the tracker to write
+    a WAV.
     """
 
     def __init__(self, offset, name):
-        AbstractEntry.__init__(self, offset, name)
+        super().__init__(offset, name)
         self._instruments = None
         self.events = None
 
@@ -37,10 +39,8 @@ class Song(AbstractEntry):
                 # Note number for melodic instruments.
                 # Velocity for percussion instruments.
                 event.args = [rom.read_ubyte()]
-                # This flag means the next byte is velocity
-                # for melodic instruments only.
-                # Since velocity is 0..127, percussion instruments
-                # should never have this flag set.
+                # This flag means the next byte is velocity for melodic instruments only.
+                # Since velocity is 0..127, percussion instruments should never have this flag set.
                 if event.args[-1] & 0x80:
                     event.args[-1] &= 0x7f
                     event.args += [rom.read_ubyte()]
