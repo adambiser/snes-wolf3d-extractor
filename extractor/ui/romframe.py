@@ -17,7 +17,7 @@ class RomFrame(tk.Frame):
         self.rom_info = tk.StringVar()
         self.rom_crc32 = tk.StringVar()
         self.entry_count = tk.IntVar()
-        self.is_rom_valid = tk.BooleanVar(False)
+        self.is_rom_valid = tk.BooleanVar(value=False)
         # Add widgets.
         # Row 0
         tk.Label(self,
