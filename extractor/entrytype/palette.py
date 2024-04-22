@@ -1,3 +1,4 @@
+import png
 import typing
 
 from .abstractentry import AbstractEntry
@@ -20,10 +21,19 @@ class Palette(AbstractEntry):
 
     def save(self, path, filename=None, filetype=None):
         """Saves the palette data as a 24-bit RGB byte dump."""
-        filename = self._get_filename(path, filename, self.name + '.pal')
-        with open(filename, "wb") as f:
+        pal_filename = self._get_filename(path, filename, self.name + '.pal')
+        with open(pal_filename, "wb") as f:
             # Write RGB values, trim off Alpha.
             f.write(bytearray([x for y in [z[0:3] for z in self.colors] for x in y]))
+        self.save_as_png(path, filename, filetype)
+
+    def save_as_png(self, path, filename=None, filetype=None):
+        # Save the palette as an 8-bit PNG.
+        filename = self._get_filename(path, filename, self.name + '_pal.png')
+        pixels = [[y * 16 + x for x in range(16)] for y in range(16)]
+        with open(filename, 'wb') as f:
+            w = png.Writer(len(pixels[0]), len(pixels), palette=self.colors, bitdepth=8)
+            w.write(f, pixels)
 
     def _get_length(self):
         return Palette._DATA_LENGTH
