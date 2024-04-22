@@ -1,5 +1,16 @@
 from .image import Image
 
+unused_colors = [i for i in range(256)]
+
+
+def scan_used_colors(pixels):
+    for y in range(len(pixels)):
+        for x in range(len(pixels[0])):
+            p = pixels[y][x]
+            if p in unused_colors:
+                unused_colors.remove(p)
+    print(unused_colors)
+
 
 class Sprite(Image):
     # Constants
@@ -39,4 +50,5 @@ class Sprite(Image):
                 for y in range(top_y, bottom_y):
                     pixels[y][pixel_x] = rom.read_ubyte()
             pixel_x += 1
+        scan_used_colors(pixels)
         self._pixels = pixels
