@@ -1,15 +1,7 @@
 from .image import Image
 
-unused_colors = [i for i in range(256)]
-
-
-def scan_used_colors(pixels):
-    for y in range(len(pixels)):
-        for x in range(len(pixels[0])):
-            p = pixels[y][x]
-            if p in unused_colors:
-                unused_colors.remove(p)
-    print(unused_colors)
+# Note that this is just a color index unused by both the original Wolfenstein 3D and Super Noah's Ark 3D sprites.
+TRANSPARENCY_COLOR_INDEX = 239
 
 
 class Sprite(Image):
@@ -22,7 +14,7 @@ class Sprite(Image):
                          Sprite.SPRITE_SIZE,
                          Sprite.SPRITE_SIZE,
                          palette_name,
-                         transparency_color_index=0xff)
+                         transparency_color_index=TRANSPARENCY_COLOR_INDEX)
         self._column_count = column_count
         self._pixels = None
 
@@ -50,5 +42,4 @@ class Sprite(Image):
                 for y in range(top_y, bottom_y):
                     pixels[y][pixel_x] = rom.read_ubyte()
             pixel_x += 1
-        scan_used_colors(pixels)
         self._pixels = pixels
